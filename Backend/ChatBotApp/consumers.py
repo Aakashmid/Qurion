@@ -1,13 +1,35 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async
 import json
+from .models import Message
+import asyncio
+from openai import OpenAI
+from decouple import config
+
+# Load environment variables from .env file
+
+# Set OpenAI API key
+
+base_url = config('OPENAI_BASE_URL')
+api_key = config('OPENAI_API_KEY')
+
+api = OpenAI(api_key=api_key, base_url=base_url)
+async def get_question_response(request_text):
+    completion = api.chat.completions.create(
+          model="o3-mini",
+          messages=[
+              {"role": "system", "content": "you are a helpful assistant."},
+              {"role": "user", "content": request_text},
+          ],
+          max_tokens=256,
+    )
+    return completion.choices[0].message.content
 
 
-async def get_question_response(question_text):
-    return "This is the response to the question: " + question_text
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_name = self.scope['url_route']['kwargs']['request_text']
         self.room_group_name = 'chat_%s' % self.room_name
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -23,29 +45,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        question_text = text_data_json['question_text']
+        request_text = text_data_json['request_text']
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'question_text':question_text
+                'request_text':request_text
             })
         
 
     async def chat_message(self, event):
-        question_text = event['question_text']
+        request_text = event['request_text']
         await self.send(text_data=json.dumps({
-            'question_text': question_text
+            'request_text': request_text
         }))
 
-        response_text =  await get_question_response(question_text)
+        response_text =  await get_question_response(request_text)
 
         await self.send(text_data=json.dumps({
             'response_text': response_text
         }))
 
+        # Save message to database
+        await self.save_message(request_text, response_text)
 
-        # save message to database , call function to save message to database
-            # Save message to database
-        await self.save_message(username, self.room_name, message)
+
+    @sync_to_async
+    def save_message(self, request_text, response_text):
+        Message.objects.create(request_text=request_text, response_text=response_text)
+
 

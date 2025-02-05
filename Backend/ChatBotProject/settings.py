@@ -21,8 +21,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphene',
-    'channels'
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -119,11 +119,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # channels layers configuration
-CHANNELS_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.redis.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('localhost', 6379)],
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
         },
-    }
+    },
 }

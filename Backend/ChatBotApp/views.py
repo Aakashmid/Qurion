@@ -14,9 +14,6 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-
 @api_view(['GET'])
 def get_messages(request):
     messages = Message.objects.all()
