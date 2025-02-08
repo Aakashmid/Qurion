@@ -12,7 +12,7 @@ export default function MessageInput() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-4 p-4 border-t border-gray-700 bg-gray-800 rounded-xl">
+    <form onSubmit={handleSubmit} className="flex items-center gap-4 p-4 border border-gray-700 bg-gray-800 rounded-xl">
       <input
         type="text"
         value={message}

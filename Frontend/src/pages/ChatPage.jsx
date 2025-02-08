@@ -1,10 +1,24 @@
 import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import MessageInput from '../components/MessageInput'
+import useToggle from '../hooks/useToggle'
 
 export default function Chatpage() {
+
     const [messagess, setMessages] = useState([{
         request_text: "Hello, how are you?",
+        response_text: "I'm doing well, thank you for asking. How about you?",
+    },
+    {
+        request_text: "I'm doing well, thank you for asking. How about you?",
+        response_text: "I'm doing well, thank you for asking. How about you?",
+    },
+    {
+        request_text: "I'm doing well, thank you for asking. How about you?",
+        response_text: "I'm doing well, thank you for asking. How about you?",
+    },
+    {
+        request_text: "I'm doing well, thank you for asking. How about you?",
         response_text: "I'm doing well, thank you for asking. How about you?",
     },
     {
@@ -30,7 +44,7 @@ export default function Chatpage() {
     ])
     const Question = ({ text }) => {
         return (
-            <div className="rounded-xl px-4 py-2 bg-gray-800 text-white w-fit">
+            <div className="rounded-xl px-4 py-2 bg-gray-700 text-white w-fit">
                 {text}
             </div>
         )
@@ -38,32 +52,30 @@ export default function Chatpage() {
 
     const Response = ({ text }) => {
         return (
-            <div className="rounded-lg px-4 py-2  text-white">
+            <div className="rounded-lg px-4 py-2  bg text-white">
                 {text}
             </div>
         )
     }
 
     return (
-        <div className="container w-full">
-            <div className="grid grid-cols-12 ">
-                <div className="col-span-3  sidebar h-screen">
-                    <Sidebar />
-                </div>
-                <div className="col-span-9   h-screen bg-gray-700 chat-wrapper py-10 relative">
-                    <div className="chat-content mx-auto lg:w-[70%] h-full  flex flex-col gap-10 px-10 overflow-y-auto ">
+        <div className="chatpage-wrapper">
+            <div className="w-full h-screen bg-gray-800">
+                <div className="h-screen w-full overflow-y-scroll pb-10">
+                    <div className="content w-full lg:w-[800px] mx-auto px-4 lg:px-8 pb-32 pt-20 flex flex-col gap-8">
                         {messagess.map((message, index) => (
-                            <div key={index} className="message flex flex-col gap-4">
+                            <div className="flex flex-col gap-2">
                                 <Question text={message.request_text} />
                                 <Response text={message.response_text} />
                             </div>
+
                         ))}
                     </div>
-                    <div className="message-input absolute bottom-10 w-full lg:w-[70%] left-1/2 -translate-x-1/2">
-                        <MessageInput/>
+                </div>
+                <div className="fixed bottom-0 w-full bg-gray-800">
+                    <div className="w-full lg:w-[800px] mx-auto p-4">
+                        <MessageInput room_name={"test"}/>
                     </div>
                 </div>
             </div>
-        </div>
-    )
-}
+        </div>)}
