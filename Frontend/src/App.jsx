@@ -15,7 +15,8 @@ function App() {
     </header>
     <Routes>
       {/* <Route path="/" element={<Home />}></Route> */}
-      <Route path="/" element={<Chatpage />}></Route>
+      <Route path="/chat" element={<Chatpage />}></Route>
+      <Route path="/chat/:conversation_name" element={<Chatpage />}></Route>
     </Routes>
       
     </>
