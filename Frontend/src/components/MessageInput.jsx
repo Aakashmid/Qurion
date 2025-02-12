@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 
-export default function MessageInput() {
+export default function MessageInput({onSendMessage}) {
   const [message, setMessage] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (message.trim()) {
       // Handle message submission here
+      onSendMessage(message);
       setMessage('')
     }
   }

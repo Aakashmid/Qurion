@@ -4,6 +4,7 @@ import Chatpage from './pages/Chatpage'
 import { Routes,Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Header from './components/Header'
+import ServerErrorPage from './pages/ServerErrorPage'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -14,9 +15,9 @@ function App() {
       <Header/>
     </header>
     <Routes>
-      {/* <Route path="/" element={<Home />}></Route> */}
-      <Route path="/chat" element={<Chatpage />}></Route>
-      <Route path="/chat/:conversation_name" element={<Chatpage />}></Route>
+      <Route path="/" element={<Chatpage />}></Route>
+      <Route path="/server-error" element={<ServerErrorPage />}></Route>
+      <Route path="/conversations/:conversation_name" element={<Chatpage />}></Route>
     </Routes>
       
     </>
