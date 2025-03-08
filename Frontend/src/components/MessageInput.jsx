@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
 
-export default function MessageInput({onSendMessage}) {
+import React, { useState } from 'react'
+import { IoSend } from 'react-icons/io5';
+
+export default function MessageInput({ onSendMessage }) {
   const [message, setMessage] = useState('')
 
   const handleSubmit = (e) => {
@@ -13,20 +15,17 @@ export default function MessageInput({onSendMessage}) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-4 p-4 border border-gray-700 bg-gray-800 rounded-xl">
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message..."
-        className="flex-1 px-4 py-2 bg-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 "  // overflow text wrap in input (handle later)
-      />
-      <button
-        type="submit"
-        className="px-4 py-2 bg-gray-600 text-gray-100 rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
-      >
-        Send
-      </button>
-    </form>
-  )
+    <form onSubmit={handleSubmit} className="flex items-center gap-4 p-1 border border-gray-700 bg-gray-800 rounded-xl">
+      <div className="relative w-full bg-gray-700 rounded-lg">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type a message..."
+          className="w-full px-4 py-3 text-lg bg-transparent text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 pr-10"
+        />
+        <button type="submit" className="absolute  right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200">
+          <IoSend size={'1.4rem'} />
+        </button>
+      </div>    </form>)
 }

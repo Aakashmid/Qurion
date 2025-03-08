@@ -37,3 +37,12 @@ export const CreateConversation = async (conversation_name) => {
         throw new Error("Error creating conversation")
     }
 }
+
+export const getConversationDetail = async (conversation_token) => {
+    try {
+        const res = await api.get(`/conversations/${conversation_token}`)
+        return res.data
+    } catch (error) {
+        throw new Error("Error fetching conversation detail")
+    }
+}

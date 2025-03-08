@@ -1,5 +1,8 @@
 let socket = null;
 let callbacks = {};
+let retryCount = 0;
+const maxRetries = 5; // Maximum number of retries
+const retryDelay = 2000; // Delay between retries in milliseconds
 
 const connect = (conversationToken) => {
     const path = `ws://127.0.0.1:8000/ws/conversations/${conversationToken}/`;
@@ -7,8 +10,9 @@ const connect = (conversationToken) => {
 
     socket.onopen = () => {
         console.log('WebSocket open');
+        retryCount = 0; // Reset retry count on successful connection
     };
-
+    
     socket.onmessage = (e) => {
         socketNewMessage(e.data);
     };
@@ -19,7 +23,13 @@ const connect = (conversationToken) => {
 
     socket.onclose = () => {
         console.log('WebSocket closed');
-        connect(conversationToken); // Reconnect on close
+        if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
+            setTimeout(() => connect(conversationToken), retryDelay);
+        } else {
+            console.log('Max retries reached. Connection failed.');
+        }
     };
 };
 
@@ -62,4 +72,4 @@ const waitForSocketConnection = (callback) => {
     }, 1);
 };
 
-export { connect, addCallbacks, sendMessage, waitForSocketConnection };
+export { connect, addCallbacks, sendMessage, waitForSocketConnection, socket };

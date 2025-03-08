@@ -17,7 +17,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Chatpage />}></Route>
       <Route path="/server-error" element={<ServerErrorPage />}></Route>
-      <Route path="/conversations/:conversation_name" element={<Chatpage />}></Route>
+      <Route path="/conversation/:conversation_token" element={<Chatpage />}></Route>
     </Routes>
       
     </>

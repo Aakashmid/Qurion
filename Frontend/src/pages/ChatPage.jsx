@@ -1,28 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { CreateConversation, fetchConversationMessages } from '../services/apiServices';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
 
-export default function Chatpage() {
-    const [messages, setMessages] = useState([]);
+export default function ChatPage() {
+    const [messages, setMessages] = useState([
+        {
+            id: 1,
+            request_text: 'hellow what is your name ',
+            response_text: 'i am chatgpt',
+        },
+        {
+            id: 2,
+            request_text: 'hellow what is your name ',
+            response_text: 'i am chatgpt',
+        },
+        {
+            id: 3,
+            request_text: 'hellow what is your name ',
+            response_text: 'i am chatgpt',
+        },
+
+
+    ]);
+    const [loading, setLoading] = useState(false);
+    const [msgloading, setMsgLoading] = useState(false);
     const { conversation_token } = useParams();
+    const navigate = useNavigate();
 
-    const Question = ({ text }) => (
-        <div className="rounded-xl px-4 py-2 bg-gray-700 text-white w-fit">
-            {text}
-        </div>
-    );
-
-    const Response = ({ text }) => (
-        <div className="rounded-lg px-4 py-2 bg-gray-600 text-white">
-            {text}
-        </div>
-    );
-
-    const getMessages = async (conversation_token) => {
+    const getMessages = async (token) => {
         try {
-            const data = await fetchConversationMessages(conversation_token);
+            const data = await fetchConversationMessages(token);
             setMessages(data);
         } catch (error) {
             console.error(error);
@@ -35,35 +44,56 @@ export default function Chatpage() {
         }
     }, [conversation_token]);
 
+
     const handleSendMessage = async (message) => {
-        if(messages.length === 0){  // if messages is empty, send create conversation  then send message to server
-            const response = await CreateConversation(message);
-            const conversation_token = response.conversation_token;
-            // await sendMessage({ conversation_token, message });
-        }
         try {
-            const response = await fetchConversationMessages(conversation_token);
-            setMessages([...messages, response]);
+            let token = conversation_token;
+            if (!token) {
+                const response = await CreateConversation(message);
+                token = response.token;
+                navigate(`/conversation/${token}`);
+            }
+            await sendMessageToConversation(token, message);
+            getMessages(token);
         } catch (error) {
             console.error(error);
         }
     };
 
+    const Question = ({ text }) => (
+        <div className=" hover:bg-gray-500 px-4">
+            <div className="rounded-xl p-2  bg-gray-700 text-white w-fit">
+                {text}
+            </div>
+        </div>
+    );
+
+    const Response = ({ text }) => (
+        <div className="px-4 hover:bg-gray-500">
+            <div className="p-2 text-white">
+                {text}
+            </div>
+        </div>
+    );
+
     return (
         <HomePageLayout>
-            <div className="h-full bg-gray-800 relative">
-                <div className="h-screen overflow-y-auto pb-10 w-full">
-                    <div className="lg:w-[720px] mx-auto px-4 lg:px-8 pb-32 pt-20 flex flex-col gap-8">
-                        {messages.map((message, index) => (
-                            <div key={index} className="flex flex-col gap-2">
+            <div className="h-full bg-gray-800 relative flex flex-col justify-between">
+                <div className="overflow-y-scroll  w-full  py-4">
+                    <div className="lg:w-[720px] mx-auto  lg:px-10 flex flex-col gap-8">
+
+                        {loading && <div className="">Loading ...</div>
+                        }
+                        {!loading && messages.length > 0 && messages.map((message, index) => (
+                            <div key={index} className="flex flex-col gap-2 ">
                                 <Question text={message.request_text} />
                                 <Response text={message.response_text} />
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className={`absolute bottom-0 ${messages.length === 0 && 'top-1/2'} w-full bg-gray-800`}>
-                    <div className="w-full lg:w-[720px] mx-auto p-4 ">
+                <div className={`absolute bottom-0  w-full bg-gray-800`}>
+                    <div className="w-full lg:w-[720px] mx-auto p-4">
                         <MessageInput onSendMessage={handleSendMessage} />
                     </div>
                 </div>
