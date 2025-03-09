@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import useToggle from '../hooks/useToggle';
 import SidebarSearchInput from './SidebarSearchInput';
 import { checkServerStatus, fetchConversations } from '../services/apiServices';
-import { PiNotePencil } from 'react-icons/pi';
+import { PiNotePencil, PiNotePencilDuotone } from 'react-icons/pi';
 import { IoMenu, IoSearch } from 'react-icons/io5';
 
 export default function Sidebar({ toggleSidebarOpen }) {
@@ -42,10 +42,13 @@ export default function Sidebar({ toggleSidebarOpen }) {
     <div className="w-full  bg-gray-700 text-white ">
       <div className="h-screen flex flex-col  ">
         <div className="p-4 flex item-center justify-between sidebar-top ">
-          <button className='open-sidebar text-white hover:bg-gray-800 p-1 rounded-xl' onClick={toggleSidebarOpen}><IoMenu size={'1.5rem'} /></button>
+          <div className="flex items-center gap-3">
+            <button className='open-sidebar text-white hover:bg-gray-800 p-1 rounded-xl' onClick={toggleSidebarOpen}><IoMenu className='w-7 lg:w-8 h-auto' /></button>
+            <h3 className="p-1 text-xl lg:text-2xl font-medium ">Proxima</h3>
+          </div>
           <div className="flex items-center gap-3 ">
-            <button className='search-icon text-white hover:text-gray-300 p-1 rounded-xl' onClick={ToggleShowSearch}><IoSearch size={'1.5rem'} /></button>
-            <button className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl' ><PiNotePencil size={'1.5rem'} /></button>
+            <button className='search-icon text-white hover:text-gray-300 p-1 rounded-xl' onClick={ToggleShowSearch}><IoSearch className='w-7  h-auto' /></button>
+            <button className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl' ><PiNotePencilDuotone className='w-7 h-auto ' /></button>
           </div>
           {showSearch && (
             <div className="absolute top-0 left-0 w-full p-2 ">
@@ -56,10 +59,7 @@ export default function Sidebar({ toggleSidebarOpen }) {
 
         {/* converstations list */}
 
-        <div className='flex-grow overflow-y-scroll px-2'>
-          <div className="">
-            <h3 className="px-4 py-2 mb-2 text-xl font-medium    mt-4">ChatGpt2.0</h3>
-          </div>
+        <div className='flex-grow overflow-y-auto px-2'>
           <ul className="flex flex-col gap-1">
             {conversations.map((conversation) => (
               <li

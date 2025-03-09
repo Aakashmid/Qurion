@@ -5,6 +5,7 @@ from rest_framework import status, viewsets
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
+from rest_framework.pagination import PageNumberPagination
 
 
 @api_view(['GET'])
@@ -27,21 +28,24 @@ def server_status(request):
 def get_conversation_messages(request, token):
     try:
         messages = Message.objects.filter(conversation__token=token).order_by('timestamp')
-        serializer = MessageSerializer(messages, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_messages = paginator.paginate_queryset(messages, request)
+        serializer = MessageSerializer(paginated_messages, many=True)
+        return paginator.get_paginated_response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     lookup_field = 'token'
+    ordering = '-updated_at'
+
     def get_object(self):
         token = self.kwargs.get('token')
         try:
-            return Conversation.objects.get(token=token)
+            return self.get_queryset().get(token=token)
         except Conversation.DoesNotExist:
-            raise Http404("Conversation not found")
-        
+            raise Http404("Conversation not found")        
