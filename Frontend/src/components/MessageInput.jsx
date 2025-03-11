@@ -15,19 +15,18 @@ export default function inputInput({ onSendMessage }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-4 p-1 border border-gray-700 bg-gray-800 rounded-xl">
-      <div className="relative w-full bg-gray-700 rounded-lg">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' ? handleSubmit(e) : null}
-          placeholder="Type a input..."
-          className="w-full px-4 py-3 text-lg bg-transparent text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 pr-10"
-        />
-        <button type="submit" className="absolute  right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200">
-          <IoSend size={'1.4rem'} />
-        </button>
-      </div>
-    </form>)
+    <form className="relative w-full bg-gray-700 rounded-xl flex items-center focus-within:ring-2 focus-within:ring-gray-500 p-2">
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' ? handleSubmit(e) : null}
+        placeholder="Type a input..."
+        className="w-full px-2 text-lg bg-transparent text-gray-100 focus:outline-none "
+      />
+      <button type="submit" className="p-1 text-gray-400 hover:text-gray-200">
+        <IoSend className='w-8 h-auto' />
+      </button>
+    </form>
+    )
 }

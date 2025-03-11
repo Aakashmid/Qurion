@@ -3,25 +3,23 @@ import React, { useEffect, useState } from 'react';
 import useToggle from '../hooks/useToggle';
 import SidebarSearchInput from './SidebarSearchInput';
 import { checkServerStatus, fetchConversations } from '../services/apiServices';
-import { PiNotePencil, PiNotePencilDuotone } from 'react-icons/pi';
+import {  PiNotePencilDuotone } from 'react-icons/pi';
 import { IoMenu, IoSearch } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar({ toggleSidebarOpen }) {
   const [showSearch, ToggleShowSearch] = useToggle(false);
-  // const [conversations, setConversations] = useState([]);
-  const [conversations, setConversations] = useState([
-    { id: 1, name: 'Chat 1' },
-
-  ]);
+  const navigate= useNavigate();
+  const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
   const get_conversations = async () => {
     try {
       const server_status = await checkServerStatus();
-      console.log(server_status)
+      console.log(server_status);
       const data = await fetchConversations();
       console.log(data);
-      setConversations(data);
+      setConversations(data.results);
     } catch (error) {
       console.error(error);
     }
@@ -29,14 +27,21 @@ export default function Sidebar({ toggleSidebarOpen }) {
 
   useEffect(() => {
     // Fetch conversations from the backend
-    if (conversations.length === 0) {
+    // if (conversations.length === 0) {
       get_conversations();
-    }
+    // }
   }, []);
 
-  const handleConversationClick = (conversation_id) => {
-    setSelectedConversation(conversation_id);
+  const handleConversationClick = (conversation) => {
+    navigate(`/c/${conversation.token}`);
+    setSelectedConversation(conversation.id);
+    toggleSidebarOpen();
   };
+
+  const handleCreateNewChat=()=>{
+    toggleSidebarOpen();
+    navigate('/');
+  }
 
   return (
     <div className="w-full  bg-gray-700 text-white ">
@@ -48,7 +53,7 @@ export default function Sidebar({ toggleSidebarOpen }) {
           </div>
           <div className="flex items-center gap-3 ">
             <button className='search-icon text-white hover:text-gray-300 p-1 rounded-xl' onClick={ToggleShowSearch}><IoSearch className='w-7  h-auto' /></button>
-            <button className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl' ><PiNotePencilDuotone className='w-7 h-auto ' /></button>
+            <button className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl'  onClick={()=>handleCreateNewChat()} ><PiNotePencilDuotone className='w-7 h-auto ' /></button>
           </div>
           {showSearch && (
             <div className="absolute top-0 left-0 w-full p-2 ">
@@ -64,8 +69,8 @@ export default function Sidebar({ toggleSidebarOpen }) {
             {conversations.map((conversation) => (
               <li
                 key={conversation.id}
-                onClick={() => handleConversationClick(conversation.id)}
-                className={`px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${conversation.id === selectedConversation ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
+                onClick={() => handleConversationClick(conversation)}
+                className={`px-4 py-2 rounded-lg cursor-pointer  ${conversation.id === selectedConversation ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
               >
                 {conversation.name}
               </li>
@@ -89,7 +94,6 @@ export default function Sidebar({ toggleSidebarOpen }) {
             </div>
           </div>
         </div>
-
 
       </div>
 

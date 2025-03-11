@@ -6,7 +6,7 @@ const HomePageLayout = ({ children }) => {
 
     // have to solve inconsistency in sidebar open and close   , also have to adjust height of layout to completely take screen
     return (
-        <div className="flex w-full min-h-[92vh]">
+        <div className="flex w-full h-screen">
             <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-all duration-300 ease-linear fixed top-0 left-0 z-20 h-screen w-full lg:w-[33%] xl:w-[25%] `}>
                 <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebarOpen={toggleSidebarOpen} />
             </div>

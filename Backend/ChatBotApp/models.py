@@ -13,6 +13,8 @@ class Conversation(models.Model):
             self.token = secrets.token_urlsafe(32)  # generating a unique random token
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name # this will be the name of the conversation in the admin panel
 
 
 # Create your models here.
