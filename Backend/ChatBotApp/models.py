@@ -26,4 +26,4 @@ class Message(models.Model):
     # reactions 
 
     def __str__(self):
-        return self.request_text
+        return self.conversation.name  + " - "+  self.request_text

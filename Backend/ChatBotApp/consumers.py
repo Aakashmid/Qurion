@@ -1,5 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .serializers import MessageSerializer
+from .serializers import MessageSerializer , MessageSerilizerForChatHistory
 from asgiref.sync import sync_to_async
 import json
 from .models import Message, Conversation
@@ -23,10 +23,13 @@ client = ChatCompletionsClient(
 )
 
 
+
+
+
 conversation_histories = {}
 async def get_question_response(request_question, token):   # token is unique for each conversation
      if token not in conversation_histories:
-         print("New conversation started")
+        #  print("New conversation started")
          conversation_histories[token] = []
          messages = await get_conversation_message(token)
          if messages:
@@ -34,6 +37,8 @@ async def get_question_response(request_question, token):   # token is unique fo
              conversation_histories[token].extend(messages)    
     
      conversation_histories[token].append(UserMessage(request_question))
+     print(conversation_histories[token])
+    
      messages = [SystemMessage("You are a helpful assistant.")] + conversation_histories[token]
 
      response = client.complete(
@@ -53,13 +58,24 @@ async def get_question_response(request_question, token):   # token is unique fo
 @sync_to_async(thread_sensitive=True)
 def get_conversation_message(token):
     try:
-        messages = Message.objects.filter(conversation__token=token).order_by('timestamp')
-        return MessageSerializer(messages, many=True).data
+        messages = Message.objects.filter(conversation__token=token).order_by('timestamp').values('request_text', 'response_text')
+        serialized_messages = MessageSerilizerForChatHistory(messages, many=True).data
+        # Flatten the list of lists
+        flattened_messages = [
+            {"role": "user", "content": message["request_text"]}
+            for message in serialized_messages
+        ] + [
+            {"role": "system", "content": message["response_text"]}
+            for message in serialized_messages
+        ]
+        return flattened_messages
+        return serialized_messages
+    
+
     except Exception as e:
         print(f"Error fetching messages: {e}")
         return []
     
-
 @sync_to_async
 def get_conversation(token):
     try:

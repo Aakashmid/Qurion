@@ -11,3 +11,11 @@ class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ['id','token','name','created_at', 'updated_at']  # Exclude the default 'id' field
+
+
+
+
+class MessageSerilizerForChatHistory(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['request_text', 'response_text']

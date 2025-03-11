@@ -11,17 +11,17 @@
               const socket = new WebSocket(socketUrl);
               setSocket(socket);
               socket.onopen = () => {
-                  console.log('WebSocket open');
+                    
+                  console.log('WebSocket open for token ' , token);
                   setErrorMsg(null);
                   setIsConnected(true);
               };
               let count=0;
               socket.onmessage = (event) => {
                   const data = JSON.parse(event.data);
-                  // if(data && data.type != 'request_text'){
-                  //     console.log(data)
-                  // }
-                  console.log(data)
+                //   if(data && data.type != 'request_text'){
+                //       console.log(data)
+                //   }
                   setNewResponse(data);
               };
               socket.onclose = () => {
@@ -37,7 +37,7 @@
                   socket.close();
               };
           }
-      }, [])
+      }, [token,ws_url])
 
       const sendMessage = (data) => {
           if (socket) {
