@@ -5,15 +5,15 @@ import SidebarSearchInput from './SidebarSearchInput';
 import { checkServerStatus, fetchConversations } from '../services/apiServices';
 import { PiDot, PiDotsThree, PiNotePencilDuotone, PiThreeDBold } from 'react-icons/pi';
 import { IoMenu, IoSearch } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ConversationLink from './side-bar-comps/ConversationLink';
 
 export default function Sidebar({ toggleSidebarOpen }) {
   const [showSearch, ToggleShowSearch] = useToggle(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
-  const [showConversationOptions, setShowConversationOptions] = useState({});
-  const [showConversationActions, setShowConversationActions] = useState({});
 
   const get_conversations = async () => {
     try {
@@ -37,13 +37,17 @@ export default function Sidebar({ toggleSidebarOpen }) {
   const handleConversationClick = (conversation) => {
     navigate(`/c/${conversation.token}`);
     setSelectedConversation(conversation.id);
-    toggleSidebarOpen();
+    if (window.innerWidth < 800)
+      toggleSidebarOpen();
   };
 
   const handleCreateNewChat = () => {
     toggleSidebarOpen();
     navigate('/');
   }
+    const isNewChat = ()=>{
+      return location.pathname === '/'
+    }
 
   return (
     <div className="w-full  bg-gray-700 text-white ">
@@ -55,7 +59,7 @@ export default function Sidebar({ toggleSidebarOpen }) {
           </div>
           <div className="flex items-center gap-3 ">
             <button className='search-icon text-white hover:text-gray-300 p-1 rounded-xl' onClick={ToggleShowSearch}><IoSearch className='w-7  h-auto' /></button>
-            <button className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl' onClick={() => handleCreateNewChat()} ><PiNotePencilDuotone className='w-7 h-auto ' /></button>
+            <button disabled={isNewChat} className='create-new-chat  text-white hover:bg-gray-800 p-1 rounded-xl' onClick={() => handleCreateNewChat()} ><PiNotePencilDuotone className='w-7 h-auto ' /></button>
           </div>
           {showSearch && (
             <div className="absolute top-0 left-0 w-full p-2 ">
@@ -69,29 +73,7 @@ export default function Sidebar({ toggleSidebarOpen }) {
         <div className='flex-grow overflow-y-auto px-2'>
           <ul className="flex flex-col gap-1 ">
             {conversations.map((conversation) => (
-              <React.Fragment key={conversation.id} >
-                <li
-                  onMouseEnter={() => setShowConversationOptions({ ...showConversationOptions, [conversation.id]: true })}
-                  onMouseLeave={() => setShowConversationOptions({ ...showConversationOptions, [conversation.id]: false })}
-                  onClick={() => handleConversationClick(conversation)}
-                  className={`px-4 relative flex justify-between items-center  py-2 rounded-lg cursor-pointer  ${conversation.id === selectedConversation ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
-                >
-                  <p className="overflow-hidden ">
-                    {conversation.name}
-                  </p>
-                  {showConversationOptions[conversation.id] && (
-                    <span className="p-1 hover:bg-gray-500 rounde-full" onClick={()=>setShowConversationActions({ ...showConversationActions, [conversation.id]: true })}><PiDotsThree /></span>
-                  )}
-                  {showConversationActions[conversation.id] && (
-                    <div className="absolute top-0 right-0 mt-8 bg-gray-600 rounded-xl shadow-lg p-2 z-10">
-                      <ul>
-                        <li className="px-4 py-2 hover:bg-gray-500 cursor-pointer">Edit</li>
-                        <li className="px-4 py-2 hover:bg-gray-500 cursor-pointer">Delete</li>
-                      </ul>
-                    </div>
-                  )}
-                </li>
-              </React.Fragment>
+              <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
             ))}
           </ul>
         </div>
@@ -101,7 +83,7 @@ export default function Sidebar({ toggleSidebarOpen }) {
         {/* <div className="h-[1.5px] my-2 rounded-lg w-full bg-gray-500"></div> */}
         <div className=" sidebar-bottom">
           {/* onclick profile open popover  */}
-          <div className="profile-card flex items-center gap-3 p-4 hover:bg-gray-600 rounded-lg cursor-pointer">
+          <div className="profile-card flex items-center gap-3 p-4 transition-all active:bg-gray-700 bg-gray-600 rounded-lg cursor-pointer">
             {/* profile image */}
             <div className="avatar w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
               <span className="text-white font-medium">U</span>

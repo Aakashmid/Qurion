@@ -160,7 +160,7 @@ export default function ChatPage() {
                 </div>
                 <div className="absolute bottom-0 w-full bg-gray-800">
                     {isSomethingWentWrong && (
-                        <div className="absolute bottom-24 w-full px-5 mx-auto">
+                        <div className="absolute bottom-24 w-full lg:w-[720px] left-1/2 -translate-x-1/2 p-5">
                             <div className="text-red-500 bg-gray-800 gap-4 flex items-center rounded-xl justify-between text-lg border border-red-500 px-6 py-2 duration-200">
                                 <span className='w-8 h-auto'><IoReload /></span>
                                 <p>Something went wrong, try again</p>

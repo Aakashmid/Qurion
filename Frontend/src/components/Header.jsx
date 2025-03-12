@@ -9,7 +9,12 @@ export default function Header() {
     const { toggleSidebarOpen } = useSidebar();
     const navigate = useNavigate();
     const handleCreateNewChat = () => {
+        console.log('new chat created');
         navigate('/');
+    }
+
+    const isNewChat = () => {
+        return location.pathname === '/'
     }
     return (
         <nav className='p-4 fixed w-full top-0 bg-gray-800 z-10 '>
