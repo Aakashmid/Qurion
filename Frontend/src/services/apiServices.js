@@ -46,3 +46,24 @@ export const getConversationDetail = async (conversation_token) => {
         throw new Error("Error fetching conversation detail")
     }
 }
+
+
+export const UpdateConversation = async (conversation_token, conversation_name) => {
+    try {
+        const res = await api.put(`/conversations/${conversation_token}/`, {
+            name: conversation_name
+        })
+        return res.data
+    } catch (error) {
+        throw new Error("Error updating conversation")
+    }
+}
+
+export const DeleteConversation = async (conversation_token) => {
+    try {
+        const res = await api.delete(`/conversations/${conversation_token}/`)
+        return res.data
+    } catch (error) {
+        throw new Error("Error deleting conversation")
+    }
+}

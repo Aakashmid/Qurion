@@ -17,11 +17,13 @@ export default function Sidebar({ toggleSidebarOpen }) {
 
   const get_conversations = async () => {
     try {
-      const server_status = await checkServerStatus();
-      console.log(server_status);
+      // const server_status = await checkServerStatus();
+      // console.log(server_status);
       const data = await fetchConversations();
-      console.log(data);
-      setConversations(data.results);
+      if (data?.results?.length > 0) {
+        setConversations(data.results);
+      }
+
     } catch (error) {
       console.error(error);
     }
@@ -45,9 +47,12 @@ export default function Sidebar({ toggleSidebarOpen }) {
     toggleSidebarOpen();
     navigate('/');
   }
-    const isNewChat = ()=>{
-      return location.pathname === '/'
-    }
+
+
+  // change the name in conversations state
+  const isNewChat = () => {
+    return location.pathname === '/'
+  }
 
   return (
     <div className="w-full  bg-gray-700 text-white ">
@@ -70,10 +75,10 @@ export default function Sidebar({ toggleSidebarOpen }) {
 
         {/* converstations list */}
 
-        <div className='flex-grow overflow-y-auto px-2'>
+        <div className='flex-grow overflow-y-auto p-2'>
           <ul className="flex flex-col gap-1 ">
             {conversations.map((conversation) => (
-              <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
+              <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} setConversations={setConversations} />
             ))}
           </ul>
         </div>
