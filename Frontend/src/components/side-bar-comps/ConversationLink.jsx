@@ -104,22 +104,29 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         </li>
             :
             // rename conversation form
-            <div className="relative transition-all">
-                <div className=" w-full rename-input px-2 z-20 focus-within:ring-2 focus-within:ring-gray-500 rounded-xl bg-gray-900 overflow-hidden flex items-center ">
-                    <input onKeyDown={(e) => { e.key === 'Enter' ? handleRename(e) : null }} type="text" className=" flex-grow px-2 py-[0.4rem]  bg-gray-900 outline-none cursor-text" placeholder={formInput} value={formInput} onChange={(e) => setFormInput(e.target.value)} />
-                    <button onClick={() => setShowRenameModal(false)} className="mr-2 hover:bg-gray-600 rounded-full py-1 px-2 transition-all text-sm">
+            <div className="relative transition-all ">
+                <div className="w-full rename-input px-1 z-20 focus-within:ring-2 focus-within:ring-gray-500 rounded-xl bg-gray-900 overflow-hidden flex items-center ">
+                    <input
+                        autoFocus
+                        onKeyDown={(e) => { e.key === 'Enter' ? handleRename(e) : null }}
+                        type="text"
+                        className=" flex-grow px-2 py-[0.4rem]  bg-gray-900 outline-none cursor-text"
+                        placeholder={formInput}
+                        value={formInput}
+                        onChange={(e) => setFormInput(e.target.value)}
+                    />
+                    <button onClick={() => setShowRenameModal(false)} className="mr-2  hover:bg-gray-600 rounded-xl py-1 px-2 transition-all text-sm">
                         Cancel
                     </button>
-                    <button onClick={() => handleRename()} className="py-1 px-2 rounded-full bg-blue-600 active:bg-blue-700  transition-all  text-sm ">
+                    <button onClick={() => handleRename()} className="py-1 px-2  rounded-xl bg-blue-600 active:bg-blue-700  transition-all  text-sm ">
                         Rename
                     </button>
                 </div>
-            </div>
-        }
+            </div>}
 
         {isConfirmModal &&
-            <div onClick={()=>setIsConfirmModal(false)}  className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 ">
-                <div className="flex-col gap-2 lg:w-1/2 w-[60%] flex bg-gray-800 p-6 rounded-lg">
+            <div onClick={() => setIsConfirmModal(false)} className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 ">
+                <div className="flex-col gap-2 lg:w-[30%] w-[60%] flex bg-gray-800 p-6 rounded-lg">
                     <h2 className="text-xl font-semibold text-white">
                         Delete Conversation
                     </h2>

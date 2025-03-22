@@ -17,6 +17,7 @@ export default function inputInput({ onSendMessage }) {
   return (
     <form className="relative w-full bg-gray-700 rounded-xl flex items-center focus-within:ring-2 focus-within:ring-gray-500 p-2">
       <input
+      autoFocus
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}

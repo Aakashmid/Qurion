@@ -6,6 +6,7 @@ import MessageInput from '../components/MessageInput';
 import useSocket from '../hooks/useSocket';
 import { Question, Response } from '../components/chat-page/SmallComponents';
 import { IoClose, IoReload } from 'react-icons/io5';
+import { HiArrowDown } from 'react-icons/hi2';
 
 export default function ChatPage() {
     const location = useLocation();
@@ -18,7 +19,7 @@ export default function ChatPage() {
 
     const navigate = useNavigate();
 
-    const [IsWebsocketConnected,newResponse, sendMessage, ErrorFromWebsoket] = useSocket(conversation_token || null, import.meta.env.VITE_WS_CONVERSATION_URL);
+    const [IsWebsocketConnected, newResponse, sendMessage, ErrorFromWebsoket] = useSocket(conversation_token || null, import.meta.env.VITE_WS_CONVERSATION_URL);
 
     // handlle load more conversation on scroll down , fetch more // **** important
 
@@ -39,17 +40,9 @@ export default function ChatPage() {
     };
 
 
-    const scrollToBottom = () => {
-        const element = document.getElementById('chat-container').lastChild
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
 
     useEffect(() => {
         if (newResponse) {
-            // console.log(typeof newResponse);
-            // console.log(first)
             const updatedMessages = [...messages];
             updatedMessages[updatedMessages.length - 1].response_text = newResponse.response_text;
             setMsgLoading(false);
@@ -81,7 +74,6 @@ export default function ChatPage() {
                 setMessages((prevMessages) => [...prevMessages, { request_text: question, response_text: "" }]);
                 sendMessage({ "request_text": question });
                 setMsgLoading(true);
-
             }
         } catch (error) {
             console.error(error);
@@ -105,9 +97,28 @@ export default function ChatPage() {
         }
     }, [first_question])
 
+
+    const scrollToBottom = () => {
+        const element = document.getElementById('chat-container').lastChild
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    const scrollToTop = () => {
+        const element = document.getElementById('chat-container').firstChild
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+
+
+    // create button to scroll to top and scroll to bottom
 
     return (
         <HomePageLayout>
@@ -123,16 +134,16 @@ export default function ChatPage() {
                                 {msgloading && messages.length - 1 === index &&
                                     <div className="text-white  ">
                                         <div className="ml-6 w-6 h-6 border-2 border-gray-500 border-t-white rounded-full animate-spin"></div>
-                                        <div className="animate-pulse w-full py-2 mt-4 h-20 bg-gray-700"></div>
                                     </div>
                                 }
                             </div>
                         ))}
 
                     </div>
+
                 </div>
                 <div className={`absolute bottom-0  w-full bg-gray-800`}>
-                    {isSomethingWentWrong && <div className="absolute bottom-24  w-full   px-5 mx-auto">
+                    {isSomethingWentWrong && <div className="absolute bottom-24  w-full lg:w-1/2   px-5 mx-auto">
                         <div className="text-red-500 bg-gray-800 gap-4 flex items-center rounded-xl justify-between  text-lg border border-red-500  px-6 py-2  duration-200">
                             <span className='w-8 h-auto'><IoReload /> </span>
                             <p className="">
@@ -143,6 +154,9 @@ export default function ChatPage() {
                         </div>
                     </div>
                     }
+                    <div className="absolute bottom-24 right-10">
+                        <div onClick={() => scrollToBottom()} className="text-white cursor-pointer active:bg-gray-600 hover:bg-gray-600 bg-gray-500 rounded-full p-2"><HiArrowDown className='h-4 w-auto' /></div>
+                    </div>
                     <div className="w-full lg:w-[720px] mx-auto p-4">
                         <MessageInput onSendMessage={handleSendMessage} />
                     </div>

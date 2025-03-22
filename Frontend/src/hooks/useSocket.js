@@ -19,10 +19,10 @@
               let count=0;
               socket.onmessage = (event) => {
                   const data = JSON.parse(event.data);
-                //   if(data && data.type != 'request_text'){
-                //       console.log(data)
-                //   }
-                  setNewResponse(data);
+                  if(data && data.type != 'request_text'){
+                      console.log(data)
+                      setNewResponse(data);
+                  }
               };
               socket.onclose = () => {
                   console.log('WebSocket closed');

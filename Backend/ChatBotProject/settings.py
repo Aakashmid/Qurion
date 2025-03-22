@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,7 +31,12 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'corsheaders',
     'rest_framework',
-    'ChatBotApp',  # my app
+    'oauth2_provider',
+    'rest_framework_simplejwt',
+    # my app
+    'ChatBotApp',  
+    'account',
+
 ]
 
 MIDDLEWARE = [
@@ -130,11 +136,13 @@ CHANNEL_LAYERS = {
 }
 
 
+
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.TokenAuthentication',),
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # OAuth2
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT
+    ),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 15,
@@ -151,8 +159,19 @@ SPECTACULAR_SETTINGS = {
 }
 
 
+# JWT Settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Token valid for 1 day
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
 # cors headers configuration
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOWED_ORIGINS = [
 #     'http://localhost:5173',  # allow specific orign to make request
 # ]
+
+
+# setting the custom user model
+AUTH_USER_MODEL = 'account.CustomUser'
