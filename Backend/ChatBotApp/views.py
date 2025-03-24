@@ -6,6 +6,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import OrderingFilter
 
 
 @api_view(['GET'])
@@ -41,7 +42,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     lookup_field = 'token'
-    ordering = '-updated_at'
+    ordering = ['-updated_at', '-created_at']
+    filter_backends = [OrderingFilter]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_object(self):
         token = self.kwargs.get('token')

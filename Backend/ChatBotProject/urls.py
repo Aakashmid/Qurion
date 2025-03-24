@@ -10,8 +10,7 @@ urlpatterns = [
     path('api/docs/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/server-status/', server_status, name='server-status'),
 
-    path('api/auth/', include('account.urls')), # user accouunt related urls
-
+    path('api/', include('account.urls')), # user accouunt related urls
     path('api/', include('ChatBotApp.urls')),  # chat related urls
 
 ]
