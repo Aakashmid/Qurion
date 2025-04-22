@@ -2,8 +2,8 @@ import axios from 'axios';
 // import { TOKEN } from './Components/constants';
 
 const api = axios.create({
-    // baseURL: import.meta.env.VITE_BACKEND_URL,
-    baseURL: 'http://127.0.0.1:8000/api/',
+    baseURL: import.meta.env.VITE_BACKEND_URL,
+    // baseURL: 'http://127.0.0.1:8000/api/',
     headers: {
         'Content-Type': 'application/json',
     }

@@ -17,14 +17,16 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
-            user_data = UserSerializer(user).data
+            # user_data = UserSerializer(user).data
             return Response({
                 'message': 'User registered successfully',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user': user_data
+                # 'user': user_data
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class LoginView(APIView):
@@ -35,14 +37,17 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
-            user_data = UserSerializer(user).data
+            # user_data = UserSerializer(user).data
             return Response({
                 'message': 'Login Successfully',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user': user_data
+                # 'user': user_data
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

@@ -6,6 +6,7 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+
     username_or_email = serializers.CharField()
 
     class Meta:
@@ -24,6 +25,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             base_username = username_or_email.split('@')[0]
             counter = 1
             username = base_username
+
+            # Ensure the username is unique by iterating til same username is not found
             while User.objects.filter(username=username).first():
                 username = f"{base_username}{counter}"
                 counter += 1
@@ -39,7 +42,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data.get('email', ''),
+            email=validated_data.get('email', ''), # Use an empty string as default email
             password=validated_data['password']
         )
         return user
@@ -66,18 +69,20 @@ class LoginSerializer(serializers.Serializer):
 
     
 class UserSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()  # Use SerializerMethodField for the 'name' field
+    name = serializers.CharField(required=False)  # Define `name` as a regular field
 
     class Meta:
         model = User
         fields = ('id', 'name', 'username', 'email', 'date_joined', 'date_updated')
 
-    def get_name(self, obj):
-        # Combine first_name and last_name to form the full name
-        return f"{obj.first_name} {obj.last_name}".strip() or None
+    def validate_name(self, value):
+        # Ensure the name is not empty
+        if not value.strip():
+            raise serializers.ValidationError("Name cannot be empty.")
+        return value
 
     def update(self, instance, validated_data):
-        name = validated_data.get('name')
+        name = validated_data.pop('name', None)
         if name:
             name_parts = name.split()
             if len(name_parts) >= 2:
@@ -87,7 +92,14 @@ class UserSerializer(serializers.ModelSerializer):
                 instance.first_name = name
                 instance.last_name = ''
 
+        # Update other fields
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
         instance.save()
         return instance
+
+    def to_representation(self, instance):
+        # Combine first_name and last_name into `name` for the response
+        ret = super().to_representation(instance)
+        ret['name'] = f"{instance.first_name} {instance.last_name}".strip()
+        return ret

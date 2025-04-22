@@ -4,7 +4,7 @@ import secrets
 
 
 class Conversation(models.Model):
-    user = models.ForeignKey('account.CustomUser', related_name='conversations', on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.CustomUser', related_name='conversations', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     token = models.CharField(max_length=100, unique=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)

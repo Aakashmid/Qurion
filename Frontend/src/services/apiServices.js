@@ -1,5 +1,5 @@
 import api from "../api"
- export const checkServerStatus = async () => {
+export const checkServerStatus = async () => {
     try {
         const response = await api.get("/server-status/")
         return response.data
@@ -8,7 +8,7 @@ import api from "../api"
     }
 }
 
-export const  fetchConversations = async () => {
+export const fetchConversations = async () => {
     try {
         const res = await api.get(`/conversations/`)
         return res.data
@@ -65,5 +65,18 @@ export const DeleteConversation = async (conversation_token) => {
         return res.data
     } catch (error) {
         throw new Error("Error deleting conversation")
+    }
+}
+
+
+export const RegisterUser = async (payload) => {
+    try {
+        const res = await api.post("/auth/registration/", {
+            username_or_email: payload.username_or_email,
+            password: payload.password
+        })
+        return res.data
+    } catch (error) {
+        throw new Error("Error registering user",error)
     }
 }

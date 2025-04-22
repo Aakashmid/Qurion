@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,27 +21,32 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
+    # Default Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_spectacular',
-    'corsheaders',
+    'django.contrib.sites',
+    # Third-party apps
     'rest_framework',
-    'oauth2_provider',
-    'rest_framework_simplejwt',
-    # my app
-    'ChatBotApp',  
-    'account',
-
+    'rest_framework.authtoken',  # Add this line
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',  # Required for social authentication
+    'allauth.socialaccount.providers.google',  # Add providers as needed
+    'drf_spectacular',
+    # Your apps
+    'ChatBotApp',
+    'accounts',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Add this line
+    'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -136,16 +142,12 @@ CHANNEL_LAYERS = {
 }
 
 
-
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # OAuth2
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),  # JWT
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 15,
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    #'PAGE_SIZE': 15,
 }
 
 
@@ -155,7 +157,6 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'A simple AI chat app api',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': True,
-    # OTHER SETTINGS
 }
 
 
@@ -174,4 +175,29 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 # setting the custom user model
-AUTH_USER_MODEL = 'account.CustomUser'
+AUTH_USER_MODEL = 'accounts.CustomUser'
+# Django Allauth settings
+# ACCOUNT_EMAIL_VERIFICATION = "optional"  # Options: "mandatory", "optional", "none"
+
+
+# JWT settings for dj-rest-auth (needed to use jwt with dj-rest-auth)
+REST_USE_JWT = True
+
+# REST_AUTH_REGISTER_SERIALIZERS = {
+#     'REGISTER_SERIALIZER': 'accounts.serializers.RegisterSerializer',
+# }
+
+# REST_AUTH_SERIALIZERS = {
+#     'LOGIN_SERIALIZER': 'accounts.serializers.LoginSerializer',
+# }
+
+# Site ID for django-allauth
+SITE_ID = 2
+
+# LOGIN_REDIRECT_URL = '/api/users'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication
+    'allauth.account.auth_backends.AuthenticationBackend',  # For django-allauth
+)
+
+SOCIALACCOUNT_PROVIDERS = {'google': {'APP': {'client_id': config('GOOGLE_CLIENT_ID'), 'secret': config('GOOGLE_CLIENT_SECRET'), 'key': ''}}}
