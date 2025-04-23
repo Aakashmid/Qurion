@@ -10,8 +10,9 @@ router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
     # path('api/auth/', include('dj_rest_auth.urls')),
-    path('api/auth/registration/', RegisterView.as_view(), name='rest_register'),
+    path('api/auth/register/', RegisterView.as_view(), name='rest_register'),
     path('api/auth/login/', LoginView.as_view(), name='rest_login'),
+    path('api/auth/refresh',TokenRefreshView.as_view(), name='token_refresh'),  
 
     #social auth urls , not complete yet 
     path('api/auth/social/', include(socialaccount_urls)),

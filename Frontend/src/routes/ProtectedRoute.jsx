@@ -1,64 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { checkServerStatus } from "../services/apiServices";
-// import { TOKEN } from "../components/constants";
 
-function ProtectedRoute({ serverProps, authorizationProps }) {
-    const [isAuthorized, setIsAuthorized] = authorizationProps;
-    const [serverStatus, setServerStatus] = serverProps;
 
-    useEffect(() => {
-        const checkServerAndAuth = async () => {
-            if (isAuthorized) {
-                setServerStatus({ isChecking: false, isError: false });
-                return;
-            }
-            try {
-                // First check if server is running
-                await checkServerStatus();
-                // If server check passes, proceed with auth check
-                const token = localStorage.getItem(TOKEN);
-                setIsAuthorized(!!token);
-            } catch (error) {
-                console.error("Server connection error:", error);
-                setServerStatus({
-                    isChecking: false,
-                    isError: true
-                });
-            } finally {
-                setServerStatus(prev => ({
-                    ...prev,
-                    isChecking: false
-                }));
-            }
-        };
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-        checkServerAndAuth();
+/**
+ * ProtectedRoute prevents access to nested routes
+ * unless an accessToken is present in memory.
+ *
+ * @param {string} redirectPath - URL to redirect unauthenticated users to
+ */
 
-    }, [setIsAuthorized, setServerStatus]);
+const ProtectedRoute = ({ redirectPath = '/auth/signin' }) => {
+    const { accessToken } = useAuth();  // get accessToken from AuthContext
 
-    // Show loading state while checking server and auth
-    if (serverStatus.isChecking) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                {/* <CircularProgress /> */}
-                
-            </div>
-        );
+    // If no token, redirect to login (replace history to avoid back-button leakage)
+    if (!accessToken) {
+        return <Navigate to={redirectPath} replace />;  // client-side navigation redirect :contentReference[oaicite:2]{index=2}
     }
 
-    // Show server error if server is not responding
-    if (serverStatus.isError) {
-        return <Navigate to="/server-error" replace />;
-    }
-
-    // Handle authentication routing
-    if (!isAuthorized) {
-        return <Navigate to="/auth/login" replace />;
-    }
-
-    console.log('protected route');
+    // If token exists, render whatever child routes are nested under this route
     return <Outlet />;
-}
+};
 
-export default ProtectedRoute;   
+export default ProtectedRoute;  
