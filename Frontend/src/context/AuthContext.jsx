@@ -1,27 +1,32 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext({
   accessToken: null,
-  signin: async () => {},
-  signout: () => {},
-  register: async () => {},
+  login: async () => { },
+  logout: async () => { },
+  register: async () => { },
 });
 
 export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [initialized, setInitialized] = useState(false);
 
+
+  const navigate = useNavigate();
   const attemptSilentRefresh = async () => {
     try {
-      const { data } = await api.post('/auth/refresh', null, {
+
+      const { data } = await api.post('/auth/refresh/',null, {
         withCredentials: true,
       });
-      setAccessToken(data.accessToken);
-      return data.accessToken;
+      console.log("refresh  function : ", data);
+      setAccessToken(data.access);
+      return data.access;
     } catch (err) {
-      console.warn('No valid refresh token - user needs to sign in');
+      console.warn('No valid refresh token - user needs to login');
       return null;
     }
   };
@@ -65,7 +70,7 @@ export const AuthProvider = ({ children }) => {
             }
           } catch (_refreshErr) {
             setAccessToken(null);
-            window.location.href = '/login';
+            window.location.href = '/auth/login';
             return Promise.reject(_refreshErr);
           }
         }
@@ -75,6 +80,14 @@ export const AuthProvider = ({ children }) => {
     return () => api.interceptors.response.eject(resI);
   }, [accessToken]);
 
+  // Navigate after accessToken is set
+  // useEffect(() => {
+  //   console.log("access token after login or register", accessToken);
+  //   if (accessToken) {
+  //     // navigate('/');
+  //   }
+  // }, [accessToken, navigate]);
+
 
 
   const register = async (userData) => {
@@ -83,20 +96,21 @@ export const AuthProvider = ({ children }) => {
     });
 
     console.log(data);
-    setAccessToken(data.accessToken);
+    setAccessToken(data.access);
+
   };
 
 
-  const signin = async (credentials) => {
+  const login = async (credentials) => {
     const { data } = await api.post('/auth/login/', credentials, {
       withCredentials: true,
     });
     console.log(data)
-    setAccessToken(data.accessToken);
+    setAccessToken(data.access);
   };
 
 
-  const signout = async () => {
+  const logout = async () => {
     await api.post('/auth/logout', {}, { withCredentials: true });
     setAccessToken(null);
   };
@@ -106,7 +120,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ accessToken, signin, signout, register }}>
+    <AuthContext.Provider value={{ accessToken, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

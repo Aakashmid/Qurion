@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
  * @param {string} redirectPath - URL to redirect unauthenticated users to
  */
 
-const ProtectedRoute = ({ redirectPath = '/auth/signin' }) => {
+const ProtectedRoute = ({ redirectPath = '/auth/login' }) => {
     const { accessToken } = useAuth();  // get accessToken from AuthContext
 
     // If no token, redirect to login (replace history to avoid back-button leakage)
