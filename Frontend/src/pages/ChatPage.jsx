@@ -7,8 +7,10 @@ import useSocket from '../hooks/useSocket';
 import { Question, Response } from '../components/chat-page/SmallComponents';
 import { IoClose, IoReload } from 'react-icons/io5';
 import { HiArrowDown } from 'react-icons/hi2';
+import { useAuth } from '../context/AuthContext';
 
 export default function ChatPage() {
+    const {attemptSilentRefresh} = useAuth();
     const location = useLocation();
     const { first_question } = location.state || {};
     const [messages, setMessages] = useState([]);
@@ -122,7 +124,7 @@ export default function ChatPage() {
 
     return (
         <HomePageLayout>
-            <div className="h-full bg-gray-800 relative flex flex-col justify-between">
+            <div className="h-full bg-gray-800 relative flex flex-col justify-between ">
                 <div className="overflow-y-auto  w-full  py-4">
                     <div id='chat-container' className="chat-container lg:w-[720px] mx-auto  lg:px-10 flex flex-col gap-8 pb-24">
                         {loading && <div className="">Loading ...</div>

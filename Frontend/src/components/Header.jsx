@@ -17,7 +17,8 @@ export default function Header() {
         return location.pathname === '/'
     }
     return (
-        <nav className='p-4 fixed w-full top-0 bg-gray-800 z-10 '>
+        <nav className='p-4 fixed w-full top-0 bg-gray-900 z-10 '>
+        {/* <nav className='p-4 fixed w-full top-0 bg-[#1E1E1E] z-10 '> */}
             <div className="flex  items-center justify-between lg:justify-normal lg:gap-5">
                 <button className='open-sidebar text-white hover:bg-gray-700 p-1 rounded-xl' onClick={toggleSidebarOpen}><IoMenu className='w-7 h-auto lg:w-8' /></button>
                 <h2 onClick={()=>navigate('/')} className="cursor-pointer logo font-bold text-xl lg:text-2xl text-gray-300">Proxima</h2>

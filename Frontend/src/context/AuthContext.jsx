@@ -16,13 +16,10 @@ export const AuthProvider = ({ children }) => {
 
 
   const navigate = useNavigate();
+
   const attemptSilentRefresh = async () => {
     try {
-
-      const { data } = await api.post('/auth/refresh/',null, {
-        withCredentials: true,
-      });
-      console.log("refresh  function : ", data);
+      const { data } = await api.post('/auth/refresh/',{  withCredentials: true});
       setAccessToken(data.access);
       return data.access;
     } catch (err) {
@@ -31,6 +28,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  //  when access token is null or undefined , refresh the token and get the new access token
   useEffect(() => {
     (async () => {
       try {
@@ -80,21 +78,12 @@ export const AuthProvider = ({ children }) => {
     return () => api.interceptors.response.eject(resI);
   }, [accessToken]);
 
-  // Navigate after accessToken is set
-  // useEffect(() => {
-  //   console.log("access token after login or register", accessToken);
-  //   if (accessToken) {
-  //     // navigate('/');
-  //   }
-  // }, [accessToken, navigate]);
+
 
 
 
   const register = async (userData) => {
-    const { data } = await api.post('/auth/register/', userData, {
-      withCredentials: true,
-    });
-
+    const { data } = await api.post('/auth/register/', userData);
     console.log(data);
     setAccessToken(data.access);
 
@@ -102,16 +91,14 @@ export const AuthProvider = ({ children }) => {
 
 
   const login = async (credentials) => {
-    const { data } = await api.post('/auth/login/', credentials, {
-      withCredentials: true,
-    });
+    const { data } = await api.post('/auth/login/',credentials);
     console.log(data)
     setAccessToken(data.access);
   };
 
 
   const logout = async () => {
-    await api.post('/auth/logout', {}, { withCredentials: true });
+    await api.post('/auth/logout', {});
     setAccessToken(null);
   };
 
@@ -120,7 +107,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ accessToken, login, logout, register }}>
+    <AuthContext.Provider value={{ accessToken, login, logout, register , attemptSilentRefresh }}>
       {children}
     </AuthContext.Provider>
   );
