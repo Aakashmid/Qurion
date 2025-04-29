@@ -9,3 +9,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 SIMPLE_JWT['AUTH_COOKIE_SECURE'] = False  # Disable secure cookies for local development
+SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'  # Allow cross-site cookies for local development

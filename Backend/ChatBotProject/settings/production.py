@@ -10,3 +10,4 @@ CORS_ALLOWED_ORIGINS = [
 
 # Ensure secure cookies in production
 SIMPLE_JWT['AUTH_COOKIE_SECURE'] = True
+SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'

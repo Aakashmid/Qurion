@@ -4,18 +4,17 @@ import { IoArrowBack, IoSearch, IoSearchCircle } from 'react-icons/io5'
 
 export default function SidebarSearchInput({ ToggleShowSearch }) {
     return (
-
-        <div className="w-full p-2 flex items-center lg:gap-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-600">
-            <button onClick={ToggleShowSearch} className="rounded-full hover:bg-gray-500 p-1">
-                <IoArrowBack size={'1.5rem'} />
+        <div className="w-full py-2 px-2 flex items-center rounded-2xl  focus-within:ring-1 focus-within:ring-purple  bg-gray-800">
+            <button onClick={ToggleShowSearch} className="rounded-full text-gray-200 hover:text-white p-1">
+                <IoArrowBack className='w-5 lg:w-6 h-auto' />
             </button>
             <input
                 type="text"
                 placeholder="Search..."
-                className=" text-lg w-full px-4 bg-gray-600 outline-none py-1 rounded-md  text-white "
+                className="  focus:outline-none caret-purple lg:text-lg w-full px-2 lg:px-4  bg-gray-800 outline-none py-1 rounded-md  text-white " 
             />
-            <button className="scale-[120%] p-1 text-gray-200 hover:text-white">
-                <IoSearch size={'1.3em'}/>
+            <button className="p-1 text-gray-200 hover:text-white">
+                <IoSearch className='w-6 h-auto'/>
             </button>
         </div>
 

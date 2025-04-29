@@ -10,7 +10,7 @@ import { HiArrowDown } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 
 export default function ChatPage() {
-    const {attemptSilentRefresh} = useAuth();
+    const { attemptSilentRefresh } = useAuth();
     const location = useLocation();
     const { first_question } = location.state || {};
     const [messages, setMessages] = useState([]);
@@ -100,33 +100,15 @@ export default function ChatPage() {
     }, [first_question])
 
 
-    const scrollToBottom = () => {
-        const element = document.getElementById('chat-container').lastChild
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    const scrollToTop = () => {
-        const element = document.getElementById('chat-container').firstChild
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
 
 
     // create button to scroll to top and scroll to bottom
 
     return (
         <HomePageLayout>
-            <div className="h-full bg-gray-800 relative flex flex-col justify-between ">
-                <div className="overflow-y-auto  w-full  py-4">
-                    <div id='chat-container' className="chat-container lg:w-[720px] mx-auto  lg:px-10 flex flex-col gap-8 pb-24">
+            <div className=" bg-gray-950 relative  ">
+                <div className="h-[calc(100vh-9rem)] lg:h-[calc(100vh-10rem)] overflow-y-auto  w-full  py-4 text-white">
+                    <div id='coversation-messages-container' className="chat-container max-w-[48rem]  mx-auto  lg:px-10 flex flex-col gap-8 pb-24">
                         {loading && <div className="">Loading ...</div>
                         }
                         {!loading && messages.length > 0 && messages.map((message, index) => (
@@ -144,7 +126,8 @@ export default function ChatPage() {
                     </div>
 
                 </div>
-                <div className={`absolute bottom-0  w-full bg-gray-800`}>
+
+                <div className={`w-full bg-gray-800`}>
                     {isSomethingWentWrong && <div className="absolute bottom-24  w-full lg:w-1/2   px-5 mx-auto">
                         <div className="text-red-500 bg-gray-800 gap-4 flex items-center rounded-xl justify-between  text-lg border border-red-500  px-6 py-2  duration-200">
                             <span className='w-8 h-auto'><IoReload /> </span>
@@ -156,12 +139,10 @@ export default function ChatPage() {
                         </div>
                     </div>
                     }
-                    <div className="absolute bottom-24 right-10">
-                        <div onClick={() => scrollToBottom()} className="text-white cursor-pointer active:bg-gray-600 hover:bg-gray-600 bg-gray-500 rounded-full p-2"><HiArrowDown className='h-4 w-auto' /></div>
-                    </div>
-                    <div className="w-full lg:w-[720px] mx-auto p-4">
-                        <MessageInput onSendMessage={handleSendMessage} />
-                    </div>
+
+
+                    {/* prompt input container*/}
+                    <MessageInput onSendMessage={handleSendMessage} />
                 </div>
             </div>
         </HomePageLayout>

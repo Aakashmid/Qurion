@@ -97,10 +97,6 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
                 )
             }
 
-
-
-
-
         </li>
             :
             // rename conversation form
