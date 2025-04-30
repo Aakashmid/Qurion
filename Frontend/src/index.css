@@ -12,6 +12,52 @@
 
   @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
   
-  @layer utilities{
 
+/* Dark mode scrollbar */
+
+  @layer utilities{
+      /* Custom Scrollbar Styles */
+      /* .scrollbar-custom::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      .scrollbar-custom::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      
+      .scrollbar-custom::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+      
+      .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      } */
+      
+      /* Dark mode scrollbar */
+
+
+      .dark-scrollbar-custom::-webkit-scrollbar-track {
+        background: #2d2d2d;
+      }
+      
+      .dark-scrollbar-custom::-webkit-scrollbar-thumb {
+        background: #ffffff;
+      }
+      
+      .dark-scrollbar-custom::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      } 
+      
+      /* Hide scrollbar but keep functionality */
+      /* .scrollbar-hide {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      } */
+      
   }

@@ -29,7 +29,7 @@ client = ChatCompletionsClient(
 conversation_histories = {}
 async def get_question_response(request_question, token):   # token is unique for each conversation
      if token not in conversation_histories:
-        #  print("New conversation started")
+        #  ("New conversation started")
          conversation_histories[token] = []
          messages = await get_conversation_message(token)
          if messages:
@@ -37,7 +37,7 @@ async def get_question_response(request_question, token):   # token is unique fo
              conversation_histories[token].extend(messages)    
     
      conversation_histories[token].append(UserMessage(request_question))
-     print(conversation_histories[token])
+    #  print(conversation_histories[token])
     
      messages = [SystemMessage("You are a helpful assistant.")] + conversation_histories[token]
 

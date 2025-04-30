@@ -4,6 +4,7 @@
       const [newResponse, setNewResponse] = useState(null);
       const [error_msg, setErrorMsg] = useState(null);
       const [isConnected, setIsConnected] = useState(false);
+      
       useEffect(() => {
           if (!token) return;
           else {
@@ -11,8 +12,7 @@
               const socket = new WebSocket(socketUrl);
               setSocket(socket);
               socket.onopen = () => {
-                    
-                  console.log('WebSocket open for token ' , token);
+                  
                   setErrorMsg(null);
                   setIsConnected(true);
               };
@@ -20,12 +20,11 @@
               socket.onmessage = (event) => {
                   const data = JSON.parse(event.data);
                   if(data && data.type != 'request_text'){
-                      console.log(data)
+                    //   console.log(data)
                       setNewResponse(data);
                   }
               };
               socket.onclose = () => {
-                  console.log('WebSocket closed');
                   setIsConnected(false);
               };
               socket.onerror = (error) => {
@@ -33,6 +32,7 @@
                   setErrorMsg(error);
                   setIsConnected(false);
               };
+
               return () => {
                   socket.close();
               };
@@ -41,7 +41,6 @@
 
       const sendMessage = (data) => {
           if (socket) {
-
               try {
                   socket.send(JSON.stringify({ ...data }));
               } catch (err) {

@@ -1,11 +1,12 @@
 from .base import *
+from  decouple import config
 
 DEBUG = False
-ALLOWED_HOSTS = ['your-production-domain.com']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'https://your-frontend-domain.com',  # Frontend origin
+    config('CORS_ALLOWED_ORIGINS').split(',')
 ]
 
 # Ensure secure cookies in production

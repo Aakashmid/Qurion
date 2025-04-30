@@ -29,7 +29,6 @@ class CustomTokenRefreshView(APIView):
 
     def post(self, request):
         # Get the refresh token from the cookies
-        print("cookies received : ", request.COOKIES)
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:

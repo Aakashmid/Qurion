@@ -1,21 +1,12 @@
 
 export const Question = ({ text }) => (
     <div className="  px-4">
-        <div className="rounded-xl p-2  bg-gray-700 text-white w-fit">
+        <div className="rounded-xl px-3 py-2 lg:py-3 lg:px-4  bg-gray-900 text-white w-fit">
             {text}
         </div>
     </div>
 );
 
-// export const Response = ({ text }) => (
-//      text ?(
-//         <div className="px-4 hover:bg-gray-500">
-//             <div className="p-2 text-white">
-//                 {text}
-//             </div>
-//         </div>
-//     ) : null
-// );
 
 
 
@@ -58,7 +49,7 @@ export const Response = ({ text }) => {
                       e.stopPropagation(); // Prevent background color change
                       handleCopy(String(children));
                     }}
-                    className="absolute right-2 top-2 bg-gray-600 hover:bg-gray-500 text-white px-2 py-1 rounded text-sm"
+                    className="absolute right-2 top-2 bg-gray-950 hover:bg-gray-900 text-white px-2 py-1 rounded text-sm"
                   >
                     {copied ? "Copied!" : "Copy"}
                   </button>
@@ -74,7 +65,7 @@ export const Response = ({ text }) => {
                   </SyntaxHighlighter>
                 </div>
               ) : (
-                <code className={`${className} bg-gray-800 px-1 rounded`} {...props}>
+                <code className={`${className} font-medium text-gray-300 px-1 rounded-md`} {...props}>
                   {children}
                 </code>
               );
