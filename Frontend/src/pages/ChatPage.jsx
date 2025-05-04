@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
@@ -21,12 +21,18 @@ export default function ChatPage() {
     clearError,
   } = useConversation(conversation_token);
 
-  
+  const bottomRef = useRef(null);
   
   useEffect(() => {
     if (first_question?.trim()) sendMessage(first_question);
   }, [first_question]);
 
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
   return (
     <HomePageLayout>
       <div className="bg-gray-950 relative ">
@@ -45,6 +51,8 @@ export default function ChatPage() {
                 <Response text={m.response_text} />
               </div>
             ))}
+            {/* Dummy div to scroll into view */}
+            <div ref={bottomRef}></div>
           </div>
         </div>
 

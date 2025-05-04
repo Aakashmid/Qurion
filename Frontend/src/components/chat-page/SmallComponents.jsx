@@ -1,6 +1,6 @@
 
 export const Question = ({ text }) => (
-    <div className="  px-4">
+    <div className="">
         <div className="rounded-xl px-3 py-2 lg:py-3 lg:px-4  bg-gray-900 text-white w-fit">
             {text}
         </div>
@@ -33,7 +33,7 @@ export const Response = ({ text }) => {
   };
 
   return (
-    <div className="px-4">
+    <div className="">
       <div className="p-2 text-white whitespace-pre-wrap break-words">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}

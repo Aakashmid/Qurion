@@ -17,9 +17,9 @@ export const fetchConversations = async () => {
     }
 }
 
-export const fetchConversationMessages = async (conversation_token) => {
+export const fetchConversationMessages = async (conversation_token, page_num) => {
     try {
-        const res = await api.get(`/conversations/${conversation_token}/messages/`)
+        const res = await api.get(`/conversations/${conversation_token}/messages/?page=${page_num}`)
         return res.data
     } catch (error) {
         throw new Error("Error fetching conversation messages")
@@ -80,6 +80,6 @@ export const RegisterUser = async (payload) => {
         })
         return res.data
     } catch (error) {
-        throw new Error("Error registering user",error)
+        throw new Error("Error registering user", error)
     }
 }
