@@ -23,8 +23,7 @@ client = ChatCompletionsClient(
 )
 
 
-conversation_histories = {}
-
+conversation_histories = {}  # for conversation history for remembering the chat for ai 
 
 async def get_question_response(request_question, token):  # token is unique for each conversation
     if token not in conversation_histories:
@@ -36,23 +35,12 @@ async def get_question_response(request_question, token):  # token is unique for
             conversation_histories[token].extend(messages)
 
     conversation_histories[token].append(UserMessage(request_question))
-    #  print(conversation_histories[token])
 
     messages = [SystemMessage("You are a helpful assistant.")] + conversation_histories[token]
 
-    # response = client.complete(
-    #     messages=messages,
-    #     stream=True,
-    #     temperature=1.0,
-    #     top_p=1.0,
-    #     max_tokens=1000,
-    #     model=model_name,
-    # )
-    # response_content = response[]
-    # return
+
 
     # return response in streaming format
-    # async with ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(token)) as client:
     response = await client.complete(
         messages=messages,
         temperature=1.0,

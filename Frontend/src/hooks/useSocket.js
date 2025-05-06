@@ -33,7 +33,7 @@ export default function useSocket(token, ws_url) {
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-            setErrorMsg(error);
+            // setErrorMsg(error);
             setIsConnected(false);
         };
 
@@ -52,6 +52,9 @@ export default function useSocket(token, ws_url) {
                 setErrorMsg(err);
                 console.error(err);
             }
+        }
+        else {
+            setErrorMsg('something went wrong');
         }
     };
 

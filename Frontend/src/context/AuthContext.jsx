@@ -60,30 +60,31 @@ export const AuthProvider = ({ children }) => {
 
 
   // Refresh the token if it's expired , for unauthorized error 
-  // useEffect(() => {
-  //   const resI = api.interceptors.response.use(
-  //     (res) => res,
-  //     async (err) => {
-  //       const orig = err.config;
-  //       if (err.response?.status === 401 && !orig._retry) {
-  //         orig._retry = true;
-  //         try {
-  //           const newToken = await attemptSilentRefresh();
-  //           if (newToken) {
-  //             orig.headers.Authorization = `Bearer ${newToken}`;
-  //             return api(orig);
-  //           }
-  //         } catch (_refreshErr) {
-  //           setAccessToken(null);
-  //           window.location.href = '/auth/login';
-  //           return Promise.reject(_refreshErr);
-  //         }
-  //       }
-  //       return Promise.reject(err);
-  //     }
-  //   );
-  //   return () => api.interceptors.response.eject(resI);
-  // }, []);
+  useEffect(() => {
+    const resI = api.interceptors.response.use(
+      (res) => res,
+      async (err) => {
+        const orig = err.config;
+        if (err.response?.status === 401 && !orig._retry) {
+          orig._retry = true;
+          try {
+            const newToken = await attemptSilentRefresh();
+            if (newToken) {
+              orig.headers.Authorization = `Bearer ${newToken}`;
+              return api(orig);
+            }
+          } catch (_refreshErr) {
+            setAccessToken(null);
+            window.location.href = '/auth/login';
+            return Promise.reject(_refreshErr);
+          }
+        }
+        return Promise.reject(err);
+      }
+    );
+    return () => api.interceptors.response.eject(resI);
+  }, []);
+
 
   const register = async (userData) => {
     const { data } = await api.post('/auth/register/', userData);
@@ -98,7 +99,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await api.post('/auth/logout', {});
+    await api.post('/auth/logout/', {});
     setAccessToken(null);
   };
 

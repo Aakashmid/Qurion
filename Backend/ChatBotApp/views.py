@@ -7,6 +7,7 @@ from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter
+from django.db.models import Max
 
 
 @api_view(['GET'])
@@ -26,9 +27,10 @@ def server_status(request):
 )
 
 
+
 def get_conversation_messages(request, token):
     try:
-        messages = Message.objects.filter(conversation__token=token).order_by('timestamp')
+        messages = Message.objects.filter(conversation__token=token).order_by('-timestamp')
         paginator = PageNumberPagination()
         paginator.page_size = 10
         paginated_messages = paginator.paginate_queryset(messages, request)
@@ -38,19 +40,21 @@ def get_conversation_messages(request, token):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     lookup_field = 'token'
-    ordering = ['-updated_at', '-created_at']
-    filter_backends = [OrderingFilter]
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
-
-    def get_object(self):
-        token = self.kwargs.get('token')
-        try:
-            return self.get_queryset().get(token=token)
-        except Conversation.DoesNotExist:
-            raise Http404("Conversation not found")        
+        # Annotate each conversation with the latest message timestamp and order by creation, update, or message activity
+        return (
+            super()
+            .get_queryset()
+            .filter(user=self.request.user)  # Filter by the authenticated user
+            .annotate(
+                latest_message_time=Max('messages__timestamp')  # Annotate with the latest message timestamp
+            )
+            .order_by('-latest_message_time', '-updated_at', '-created_at') 
+        )

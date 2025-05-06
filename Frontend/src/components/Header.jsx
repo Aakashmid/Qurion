@@ -14,10 +14,8 @@ export default function Header() {
         navigate('/');
     }
 
-    const isNewChat = () => {
-        console.log("new chat is already create ")
-        return location.pathname === '/'
-    }
+    const isNewChat = location.pathname === '/';
+    
 
     return (
 

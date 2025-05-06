@@ -8,9 +8,9 @@ export const checkServerStatus = async () => {
     }
 }
 
-export const fetchConversations = async () => {
+export const fetchConversations = async (page_num =1) => {
     try {
-        const res = await api.get(`/conversations/`)
+        const res = await api.get(`/conversations/?page=${page_num}`)
         return res.data
     } catch (error) {
         throw new Error("Error fetching conversation")

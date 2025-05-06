@@ -5,7 +5,7 @@ import AuthForm from '../components/auth/AuthForm';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { accessToken,login } = useAuth();
+    const { accessToken,login,logout } = useAuth();
     const [error, setError] = useState('');
 
     const handleLogin = async (formData) => {
@@ -19,11 +19,13 @@ export default function Login() {
     };
 
     useEffect(() => {
-        console.log(accessToken)
+        console.log(accessToken);
         if (accessToken) {
           navigate('/'); // Navigate when accessToken is ready
         }
       }, [accessToken, navigate]);
+
+
 
     return (
         // login form

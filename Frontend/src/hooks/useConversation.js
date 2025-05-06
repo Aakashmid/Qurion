@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CreateConversation, fetchConversationMessages } from '../services/apiServices';
 import useSocket from './useSocket';
+import { useNavigate } from 'react-router-dom';
+import { useSidebar } from '../context/SidebarContext';
 
 export default function useConversation(initialToken) {
   const [token, setToken] = useState(null);
@@ -10,6 +12,8 @@ export default function useConversation(initialToken) {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const {setConversations} = useSidebar();
+  const navigate = useNavigate();
 
   const [isConnected, newResponse, sendOverSocket, socketError] =
     useSocket(token, import.meta.env.VITE_WS_CONVERSATION_URL);
@@ -45,8 +49,8 @@ export default function useConversation(initialToken) {
         if (!updateTimeout.current) {
           updateTimeout.current = setTimeout(() => {
             setMessages(prev => {
-              const updated = [...prev];
-              updated[updated.length - 1].response_text += responseBuffer.current;
+              let updated = [...prev];
+              updated[0].response_text += responseBuffer.current;
               responseBuffer.current = ''; // Clear the buffer
               return updated;
             });
@@ -56,8 +60,8 @@ export default function useConversation(initialToken) {
       } else if (newResponse.type === 'response_complete') {
         // Finalize the response
         setMessages(prev => {
-          const updated = [...prev];
-          updated[updated.length - 1].response_text = newResponse.response_text;
+          let updated = [...prev];
+          updated[0].response_text =newResponse.response_text;
           return updated;
         });
         responseBuffer.current = ''; // Clear the buffer
@@ -71,17 +75,21 @@ export default function useConversation(initialToken) {
     if (socketError) setError(socketError);
   }, [socketError]);
 
+
   // Send a new user message
   const sendMessage = async (requestText) => {
     try {
       if (!token) {
         const resp = await CreateConversation(requestText);
-        setToken(resp.token);
-      } else {
-        setMessages(prev => [...prev, { request_text: requestText, response_text: '' }]);
+        // setConversations((prev)=>[...prev,resp]);
+        navigate(`/c/${resp.token}`, { state: {requestText } })
+      }
+      else {
+        setMessages(prev => [ { request_text: requestText, response_text: '' },...prev]);
         sendOverSocket({ request_text: requestText });
       }
     } catch (err) {
+      console.log(err)
       setError(err);
     }
   };

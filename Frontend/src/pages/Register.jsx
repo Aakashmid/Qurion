@@ -21,7 +21,7 @@ export default function Register() {
   useEffect(() => {
     console.log(accessToken)
     if (accessToken) {
-      navigate('/hello'); // Navigate when accessToken is ready
+      navigate('/'); // Navigate when accessToken is ready
     }
   }, [accessToken, navigate]);
 
