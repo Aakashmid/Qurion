@@ -7,7 +7,11 @@ export default function useSocket(token, ws_url) {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        if (!token) return;
+        if (!token) {
+            console.log('token is not defined');
+            return;
+        }
+            
 
         const socketUrl = `${ws_url}${token}/`;
         const socket = new WebSocket(socketUrl);
@@ -45,6 +49,8 @@ export default function useSocket(token, ws_url) {
     }, [token, ws_url]);
 
     const sendMessage = (data) => {
+        console.log('send message is called in websocket hook');
+        console.log(data); 
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             try {
                 socketRef.current.send(JSON.stringify(data));

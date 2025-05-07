@@ -16,7 +16,7 @@ export default function Sidebar() {
   const { toggleSidebarOpen, conversations, get_conversations } = useSidebar();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState(null);
-  const {access_token} = useAuth();
+  const { access_token } = useAuth();
 
   const handleConversationClick = (conversation) => {
     navigate(`/c/${conversation.token}`);
@@ -36,7 +36,6 @@ export default function Sidebar() {
 
 
   useEffect(() => {
-    console.log('conversations fetched')
     get_conversations();
   }, [access_token])
 
@@ -49,7 +48,7 @@ export default function Sidebar() {
       {/* sidebar top */}
       <SidebarTop />
       {/* sidebar middle */}
-      <div className='overflow-y-auto p-2 bg-gray-900 h-[calc(100vh-9rem)]'>
+      <div className=' p-2 bg-gray-900 h-[calc(100vh-9rem)] flex flex-col '>
         <div className="p-2">
           <button onClick={() => handleCreateNewChat()} disabled={isNewChat} className='bg-purple  p-2 lg:p-3  flex items-center gap-4 w-full rounded-lg justify-center hover:bg-purple/90 active:bg-purple/90 transition-colors'>
             <RiChatNewLine className='w-5 h-auto' />
@@ -59,8 +58,9 @@ export default function Sidebar() {
           </button>
           {/* <button onClick={()=>{get_conversations()}} className='p-2 bg-gray-200 hover:bg-gray-300 text-black mt-2 rounded-2xl'>Fetch Conversations</button> */}
         </div>
-        <div className="mt-4">
-          <h3 className="py-2 px-3 text-gray-400 font-semibold text-sm">Recent Conversation</h3>
+
+        <h3 className="py-1 px-3 text-gray-400 font-semibold text-sm">Recent Conversation</h3>
+        <div className="mt-4 overflow-y-auto scrollbar-dark flex-grow">
           <ul className="flex flex-col gap-1 ">
             {conversations.map((conversation) => (
               <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />

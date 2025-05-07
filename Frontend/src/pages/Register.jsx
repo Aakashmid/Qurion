@@ -19,16 +19,15 @@ export default function Register() {
   };
 
   useEffect(() => {
-    console.log(accessToken)
     if (accessToken) {
       navigate('/'); // Navigate when accessToken is ready
     }
   }, [accessToken, navigate]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+    <div className="flex flex-col justify-center items-center min-h-screen">
+      <div className="logo text-white mb-10">Qurion</div>
+      <div className="bg-white p-8 rounded-lg shadow-md w-11/12 sm:w-96">
         <h1 className="text-2xl font-bold text-center mb-10">Create your Account </h1>
         {error && <div className="absolute text-red-500 text-center -top-10">{error}</div>}
         <AuthForm formType="register" onSubmit={handleRegisteration} />

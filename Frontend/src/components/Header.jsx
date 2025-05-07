@@ -3,11 +3,12 @@ import { RiChatNewLine } from "react-icons/ri";
 import { useSidebar } from '../context/SidebarContext';
 import { IoMenu } from 'react-icons/io5';
 import { TbMenu3 } from "react-icons/tb";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PiDotsThree, PiDotsThreeVertical, PiDotsThreeVerticalBold, PiOption } from 'react-icons/pi';
 
 export default function Header() {
     const { isSidebarOpen, toggleSidebarOpen } = useSidebar();
+    const location = useLocation();
     const navigate = useNavigate();
     const handleCreateNewChat = () => {
         console.log('new chat created');
@@ -25,7 +26,7 @@ export default function Header() {
             <div className="items-center justify-between md:justify-normal md:gap-5 h-full md:flex hidden">
                 <button className={`open-sidebar text-gray-200 hover:text-white p-1 rounded-xl ${isSidebarOpen && 'md:hidden'}`} onClick={toggleSidebarOpen}><TbMenu3 className='w-7 h-auto lg:w-8' /></button>
 
-                <button disabled={isNewChat} className={`create-new-chat-btn text-gray-200 hover:text-white p-1 rounded-xl ${isSidebarOpen && 'md:hidden'}`} onClick={()=>handleCreateNewChat}><RiChatNewLine className='w-6 h-auto' /></button>
+                <button disabled={isNewChat} className={`create-new-chat-btn text-gray-200 hover:text-white p-1 rounded-xl ${isSidebarOpen && 'md:hidden'}`} onClick={()=>handleCreateNewChat()}><RiChatNewLine className='w-6 h-auto' /></button>
                 <h2 className=" logo font-bold text-xl lg:text-2xl text-gray-300 ">Qurion</h2>
 
             </div>

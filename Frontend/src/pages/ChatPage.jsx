@@ -20,11 +20,14 @@ export default function ChatPage() {
     sendMessage,
     loadMore,
     clearError,
+    isConnected,
   } = useConversation(conversation_token);
+
 
   const scrollableRef = useRef(null);
   const bottomRef = useRef(null);
   const isFirstRender = useRef(null); // Track if it's the first render
+
   useEffect(() => {
     // Reset isFirstRender when conversation_token changes
     isFirstRender.current = true;
@@ -32,8 +35,11 @@ export default function ChatPage() {
 
 
   useEffect(() => {
-    if (first_question?.trim()) sendMessage(first_question);
-  }, [first_question]);
+    if (first_question?.trim() && isConnected) {
+      console.log('first question is ',first_question)
+      sendMessage(first_question);
+    }
+  }, [first_question,isConnected]);
 
   useEffect(() => {
     if (bottomRef.current && !isFirstRender.current) {
@@ -43,18 +49,20 @@ export default function ChatPage() {
       scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
       isFirstRender.current = false; // Mark as no longer the first render
     }
+
+    console.log(messages);
   }, [messages]);
 
   return (
     <HomePageLayout>
       <div className="bg-gray-950 relative ">
         <div ref={scrollableRef}
-          className="h-[calc(100vh-10rem)] overflow-y-auto p-4 dark-scrollbar-custom "
+          className="h-[calc(100vh-10rem)] overflow-y-auto p-4 scrollbar-light"
         >
-          <div className="flex flex-col  chat-container  max-w-[48rem]">
+          <div className="flex flex-col  chat-container  max-w-[48rem] mx-auto">
 
             {/* messages container */}
-            <div className=" mx-auto text-sm messages-container flex flex-col-reverse  ">
+            <div className="  text-sm messages-container flex flex-col-reverse  ">
               {loading && <div>Loading…</div>}
               {messages.map((m, i) => (
                 <div className='py-2' key={i}>

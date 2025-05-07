@@ -12,7 +12,7 @@ export default function useConversation(initialToken) {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const {setConversations} = useSidebar();
+  const { setConversations } = useSidebar();
   const navigate = useNavigate();
 
   const [isConnected, newResponse, sendOverSocket, socketError] =
@@ -50,8 +50,12 @@ export default function useConversation(initialToken) {
           updateTimeout.current = setTimeout(() => {
             setMessages(prev => {
               let updated = [...prev];
-              updated[0].response_text += responseBuffer.current;
-              responseBuffer.current = ''; // Clear the buffer
+              if (updated.length > 0) {
+                updated[0].response_text += responseBuffer.current;
+                responseBuffer.current = ''; // Clear the buffer
+              } else {
+                  // updated.push({request_text:})
+              }
               return updated;
             });
             updateTimeout.current = null; // Clear the timeout
@@ -61,7 +65,7 @@ export default function useConversation(initialToken) {
         // Finalize the response
         setMessages(prev => {
           let updated = [...prev];
-          updated[0].response_text =newResponse.response_text;
+          updated[0].response_text = newResponse.response_text;
           return updated;
         });
         responseBuffer.current = ''; // Clear the buffer
@@ -81,11 +85,11 @@ export default function useConversation(initialToken) {
     try {
       if (!token) {
         const resp = await CreateConversation(requestText);
-        // setConversations((prev)=>[...prev,resp]);
-        navigate(`/c/${resp.token}`, { state: {requestText } })
+        setConversations((prev) => [...prev, resp]);
+        navigate(`/c/${resp.token}`, { state: { requestText } })
       }
       else {
-        setMessages(prev => [ { request_text: requestText, response_text: '' },...prev]);
+        setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
         sendOverSocket({ request_text: requestText });
       }
     } catch (err) {
