@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CreateConversation, fetchConversationMessages } from '../services/apiServices';
 import useSocket from './useSocket';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../context/SidebarContext';
 
 export default function useConversation(initialToken) {
@@ -15,6 +15,12 @@ export default function useConversation(initialToken) {
   const { setConversations } = useSidebar();
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+
+  // Track the current request text when starting a new conversation
+  const currentRequestText = useRef('');
+
   const [isConnected, newResponse, sendOverSocket, socketError] =
     useSocket(token, import.meta.env.VITE_WS_CONVERSATION_URL);
 
@@ -24,6 +30,16 @@ export default function useConversation(initialToken) {
   useEffect(() => {
     setToken(initialToken);
   }, [initialToken]);
+
+  useEffect(() => {
+    if (location.state?.requestText?.trim() && isConnected) {
+      // console.log('first question is ', first_question)
+      setMessages([{ request_text: location.state.requestText, response_text: '' }]);
+      sendOverSocket({ request_text: location.state.requestText });
+
+    }
+  }, [location.state, isConnected]);
+
 
   // Fetch a page of messages
   const loadMessages = useCallback(async (pageNum = 1) => {
@@ -52,10 +68,16 @@ export default function useConversation(initialToken) {
               let updated = [...prev];
               if (updated.length > 0) {
                 updated[0].response_text += responseBuffer.current;
-                responseBuffer.current = ''; // Clear the buffer
+                console.log('length more than 0');
               } else {
-                  // updated.push({request_text:})
+                console.log('length  0');
+                // Handle case when messages array is empty (first message)
+                updated.push({
+                  request_text: currentRequestText.current,
+                  response_text: responseBuffer.current
+                });
               }
+              responseBuffer.current = ''; // Clear the buffer
               return updated;
             });
             updateTimeout.current = null; // Clear the timeout
@@ -65,7 +87,15 @@ export default function useConversation(initialToken) {
         // Finalize the response
         setMessages(prev => {
           let updated = [...prev];
-          updated[0].response_text = newResponse.response_text;
+          if (updated.length > 0) {
+            updated[0].response_text = newResponse.response_text;
+          } else {
+            // Handle case when messages array is empty (first message)
+            updated.push({
+              request_text: currentRequestText.current,
+              response_text: newResponse.response_text
+            });
+          }
           return updated;
         });
         responseBuffer.current = ''; // Clear the buffer
@@ -79,21 +109,22 @@ export default function useConversation(initialToken) {
     if (socketError) setError(socketError);
   }, [socketError]);
 
-
   // Send a new user message
   const sendMessage = async (requestText) => {
     try {
       if (!token) {
         const resp = await CreateConversation(requestText);
         setConversations((prev) => [...prev, resp]);
-        navigate(`/c/${resp.token}`, { state: { requestText } })
+        // Store the request text for when we receive the first response
+        currentRequestText.current = requestText;
+        navigate(`/c/${resp.token}`, { state: { requestText } });
       }
       else {
         setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
         sendOverSocket({ request_text: requestText });
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       setError(err);
     }
   };
@@ -113,7 +144,7 @@ export default function useConversation(initialToken) {
     } else {
       setMessages([]);
     }
-  }, [token]);
+  }, [token, location.state]);
 
   // Clear error state
   const clearError = () => {

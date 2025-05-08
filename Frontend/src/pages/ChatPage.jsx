@@ -34,12 +34,12 @@ export default function ChatPage() {
   }, [conversation_token]);
 
 
-  useEffect(() => {
-    if (first_question?.trim() && isConnected) {
-      console.log('first question is ',first_question)
-      sendMessage(first_question);
-    }
-  }, [first_question,isConnected]);
+  // useEffect(() => {
+  //   if (first_question?.trim() && isConnected) {
+  //     console.log('first question is ',first_question)
+  //     sendMessage(first_question);
+  //   }
+  // }, [first_question,isConnected]);
 
   useEffect(() => {
     if (bottomRef.current && !isFirstRender.current) {

@@ -1,25 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { PiDotsThree } from 'react-icons/pi';
 import { DeleteConversation, UpdateConversation } from '../../services/apiServices';
-import {useLongPress} from 'use-long-press';
+import { useLongPress } from 'use-long-press';
+import { useSidebar } from '../../context/SidebarContext';
+import { useNavigate } from 'react-router-dom';
 
-export default function ConversationLink({ conversation, onClickLink, selectedConversation, setConversations }) {
+export default function ConversationLink({ conversation, onClickLink, selectedConversation, }) {
     const [showOptionIcon, setShowOptionIcon] = useState(false);
     const [showActionMenu, setShowActionMenu] = useState(false);
     const [showRenameModal, setShowRenameModal] = useState(false);
     const [isConfirmModal, setIsConfirmModal] = useState(false);
     const [conversationName, setConversationName] = useState(conversation.name);
-    const [formInput, setFormInput] = useState(conversation.name);
     const [showActionBtn, setShowActionBtn] = useState(selectedConversation === conversation.id);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+    const { setConversations } = useSidebar();
 
-    const handleLongPress = useLongPress((event) => {
-        if (window.innerWidth < 1024) {
-            const touch = event.touches[0];
-            setPosition({ x: touch.clientX, y: touch.clientY });
-            setShowActionMenu(true);
-        }
-    });
+    const navigate = useNavigate();
 
     const handleMouseEnter = () => {
         if (window.innerWidth >= 1024) {
@@ -35,11 +31,11 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
 
     const handleRename = async () => {
         try {
-            if (formInput.trim() !== '') {
-                const data = await UpdateConversation(conversation.token, formInput);
+            if (conversationName.trim() !== '') {
+                const data = await UpdateConversation(conversation.token, conversationName);
                 if (data) {
                     console.log(data);
-                    setConversationName(formInput);
+                    setConversationName(conversationName);
                 }
             }
         } catch (error) {
@@ -51,22 +47,63 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
     const handleDelete = async () => {
         try {
             const data = await DeleteConversation(conversation.token);
+
             setConversations((prevConvs) => prevConvs.filter((con) => con.id !== conversation.id));
+            if (selectedConversation === conversation.id) {
+                navigate('/');
+            }
             console.log(data)
         } catch (error) {
             console.error(error);
         }
     }
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            const renameInput = document.querySelector('.rename-input');
-            const actionMenu = document.querySelector('.action-menu');
-            if (renameInput && !renameInput.contains(event.target)) {
-                setShowRenameModal(false);
+    const convLinkRef = useRef();
+    const threeDotRef = useRef();
+    const menuRef = useRef();
+
+    const handleConversationClick = (event) => {
+        if (!threeDotRef.current?.contains(event.target)) {
+            onClickLink(conversation);
+            setShowActionMenu(false);
+        }
+    }
+
+    const calculateMenuPosition = () => {
+        if (convLinkRef.current && menuRef.current) {
+            const linkRect = convLinkRef.current.getBoundingClientRect();
+            const menuRect = menuRef.current.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+
+            let top = 0;
+            let right = 4;
+
+            // Check if menu would go below viewport
+            if (linkRect.bottom + menuRect.height > viewportHeight) {
+                top = -menuRect.height + linkRect.height;
             }
-            if (actionMenu && !actionMenu.contains(event.target)) {
+
+            // Check if menu would go beyond right edge
+            if (linkRect.right + menuRect.width > viewportWidth) {
+                right = menuRect.width;
+            }
+
+            setMenuPosition({ top, right });
+        }
+    };
+
+    useEffect(() => {
+        if (showActionMenu) {
+            calculateMenuPosition();
+        }
+    }, [showActionMenu]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (convLinkRef.current && !convLinkRef.current.contains(e.target)) {
                 setShowActionMenu(false);
+                setShowRenameModal(false);
             }
         };
 
@@ -74,64 +111,67 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [])
+    }, []);
+
+    const handleLongPress = useLongPress(() => {
+        setShowActionMenu(true);
+    }, {
+        onCancel: () => {
+            setShowActionMenu(false);
+        },
+    });
 
     return <>
-        <div
-            className='flex-grow text-sm lg:text-base'
+        <div ref={convLinkRef}
+            className='flex-grow text-sm lg:text-base relative conversation-link'
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            
         >
-            <div {...handleLongPress()} onClick={() => onClickLink(conversation)} className={`${selectedConversation === conversation.id ? 'bg-gray-800' : ''} relative overflow-hidden flex flex-col px-3 py-2 hover:bg-gray-800 cursor-pointer rounded-lg transition-colors duration-200`}>
-                <p className='text-gray-200 font-medium'>{conversation.name.length > 30 ? conversation.name.substring(0, 30) + '...' : conversation.name}</p>
-
-                {showActionMenu && (
-                    <div
-                        className="action-menu absolute bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50"
-                        style={{
-                            top: window.innerWidth >= 1024 ? '100%' : position.y,
-                            left: window.innerWidth >= 1024 ? 'auto' : position.x,
-                            right: window.innerWidth >= 1024 ? '0' : 'auto',
+            {!showRenameModal ?
+                <div {...handleLongPress()} onClick={(e) => handleConversationClick(e)} className={`${selectedConversation === conversation.id ? 'bg-gray-800' : ''} relative  flex flex-col overflow-hidden px-3 py-2 hover:bg-gray-800 cursor-pointer rounded-lg transition-colors duration-200`}>
+                    <p className='text-gray-200 font-medium'>{conversationName.length > 30 ? conversationName.substring(0, 30) + '...' : conversationName}</p>
+                    {showOptionIcon &&
+                        <div ref={threeDotRef} id='three-dot' onClick={(e) => {
+                            setShowActionMenu(!showActionMenu);
+                        }} className="absolute right-0 top-0 p-1 pl-2 hover:bg-gradient-to-r h-full hover:from-transparent hover:to-gray-700 bg-opacity-40 z-10 flex justify-center items-center">
+                            <PiDotsThree className="h-6 w-auto text-gray-400 hover:text-white cursor-pointer" />
+                        </div>
+                    }
+                </div>
+                :
+                <div className="rename-modal" >
+                    <input
+                        type="text"
+                        className="rename-input w-full bg-gray-950 text-gray-200 px-3 py-2 rounded-lg focus:outline-none "
+                        value={conversationName}
+                        onChange={(e) => {
+                            setConversationName(e.target.value);
                         }}
-                    >
-                        <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-gray-200" onClick={() => setShowRenameModal(true)}>Rename</div>
-                        <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-gray-200" onClick={handleDelete}>Delete</div>
-                    </div>
-                )}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                setShowRenameModal(false);
+                                handleRename();
+                            }
+                            if (e.key === 'Escape') {
+                                setShowRenameModal(false);
+                            }
+                        }}
+                        autoFocus
+                    />
+                </div>
+            }
 
-                {showOptionIcon &&
-                    <div onClick={(e) => {
-                        e.stopPropagation()
-                        setShowActionMenu(!showActionMenu);
-                    }} className="absolute right-0 top-0 p-1 pl-2 hover:bg-gradient-to-r h-full hover:from-transparent hover:to-gray-700 bg-opacity-40 z-10 flex justify-center items-center">
-                        <PiDotsThree className="h-6 w-auto text-gray-400 hover:text-white cursor-pointer" />
-                    </div>
-                }
-            </div>
-
-            {showRenameModal &&
-                <input
-                    type="text"
-                    className="rename-input w-full bg-gray-900 text-gray-200 px-3 py-2 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500"
-                    value={conversation.name}
-                    onChange={(e) => {
-                        setConversations((prevConvs) =>
-                            prevConvs.map((conv) =>
-                                conv.id === conversation.id ? { ...conv, name: e.target.value } : conv
-                            )
-                        );
+            {showActionMenu && (
+                <div
+                    ref={menuRef}
+                    style={{
+                        top: `${menuPosition.top}px`,
+                        right: `${menuPosition.right}px`
                     }}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            setShowRenameModal(false);
-                        }
-                        if (e.key === 'Escape') {
-                            setShowRenameModal(false);
-                        }
-                    }}
-                    autoFocus
-                />
+                    className="action-menu absolute bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
+                    <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-gray-200" onClick={() => { setShowRenameModal(true); setShowActionMenu(false); }}>Rename</div>
+                    <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-red-600" onClick={() => handleDelete()}>Delete</div>
+                </div>)
             }
         </div>
     </>
