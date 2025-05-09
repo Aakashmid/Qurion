@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { checkServerStatus, fetchConversations } from '../services/apiServices';
-import { IoMenu, IoSearch } from 'react-icons/io5';
+import { IoMenu, IoReload, IoSearch } from 'react-icons/io5';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ConversationLink from './sidebar-compnents/ConversationLink';
 import { RiChatNewLine } from 'react-icons/ri';
@@ -10,10 +10,11 @@ import SidebarProfileCard from './sidebar-compnents/SidebarProfileCard';
 
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
+import { PiCircle } from 'react-icons/pi';
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const { toggleSidebarOpen, conversations, get_conversations } = useSidebar();
+  const { toggleSidebarOpen, conversations, getConversations, loading, loadMoreConversations, hasMore } = useSidebar();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const { access_token } = useAuth();
@@ -36,13 +37,34 @@ export default function Sidebar() {
 
 
   useEffect(() => {
-    get_conversations();
+    getConversations();
   }, [access_token])
 
   // change the name in conversations state
   const isNewChat = location.pathname === '/'
 
 
+
+  const bottomRef = useRef(null);
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const element = bottomRef.current;
+  //     // if (!element || !hasMore || loading) return;
+
+  //     const rect = element.getBoundingClientRect();
+  //     const isNearBottom = rect.top <= window.innerHeight + 300;
+
+  //     if (isNearBottom) {
+  //       console.log('loaded more');
+  //       loadMoreConversations();
+  //     }
+  //   };
+  //   window.addEventListener('scroll', handleScroll);
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, []);
   return (
     <div className="w-full   text-white h-screen">
       {/* sidebar top */}
@@ -65,6 +87,16 @@ export default function Sidebar() {
             {conversations.map((conversation) => (
               <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
             ))}
+            {loading && <div className='flex justify-center items-center text-gray-400 text-sm'>Loading…</div>}
+            
+            {hasMore && !loading && (
+              <button
+                onClick={loadMoreConversations}
+                className="text-sm text-gray-400 hover:text-gray-300 flex items-center gap-4 justify-center"
+              >
+                Load More <IoReload />
+              </button>
+            )}
 
           </ul>
         </div>

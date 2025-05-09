@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CreateConversation, fetchConversationMessages } from '../services/apiServices';
 import useSocket from './useSocket';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSidebar } from '../context/SidebarContext';
 
 export default function useConversation(initialToken) {
@@ -15,121 +15,130 @@ export default function useConversation(initialToken) {
   const { setConversations } = useSidebar();
   const navigate = useNavigate();
 
-  const location = useLocation();
-
-
-  // Track the current request text when starting a new conversation
   const currentRequestText = useRef('');
+  const firstMessageRef = useRef(null);
+  const responseBuffer = useRef('');
+  const updateTimeout = useRef(null);
 
   const [isConnected, newResponse, sendOverSocket, socketError] =
     useSocket(token, import.meta.env.VITE_WS_CONVERSATION_URL);
 
-  const responseBuffer = useRef(''); // Buffer to accumulate response chunks
-  const updateTimeout = useRef(null); // Timeout for debouncing updates
-
+  // Sync initial token
   useEffect(() => {
     setToken(initialToken);
   }, [initialToken]);
 
-  useEffect(() => {
-    if (location.state?.requestText?.trim() && isConnected) {
-      // console.log('first question is ', first_question)
-      setMessages([{ request_text: location.state.requestText, response_text: '' }]);
-      sendOverSocket({ request_text: location.state.requestText });
-
-    }
-  }, [location.state, isConnected]);
-
-
-  // Fetch a page of messages
+  // Fetch paginated messages
   const loadMessages = useCallback(async (pageNum = 1) => {
     try {
       setLoading(true);
       const data = await fetchConversationMessages(token, pageNum);
-      setMessages(prev => (pageNum === 1 ? data.results : [...prev, ...data.results]));
+      setMessages(prev =>
+        pageNum === 1 ? data.results : [...prev, ...data.results]
+      );
       setHasMore(!!data.next);
     } catch (err) {
+      console.error(err);
       setError(err);
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  // Handle real-time updates with debouncing
+  // Handle real-time streamed responses
   useEffect(() => {
-    if (newResponse) {
-      if (newResponse.type === 'response_chunk') {
-        responseBuffer.current += newResponse.response_text; // Accumulate chunks
+    if (!newResponse) return;
 
-        // Debounce updates to the UI
-        if (!updateTimeout.current) {
-          updateTimeout.current = setTimeout(() => {
-            setMessages(prev => {
-              let updated = [...prev];
-              if (updated.length > 0) {
-                updated[0].response_text += responseBuffer.current;
-                console.log('length more than 0');
-              } else {
-                console.log('length  0');
-                // Handle case when messages array is empty (first message)
-                updated.push({
-                  request_text: currentRequestText.current,
-                  response_text: responseBuffer.current
-                });
-              }
-              responseBuffer.current = ''; // Clear the buffer
-              return updated;
-            });
-            updateTimeout.current = null; // Clear the timeout
-          }, 100); // Update every 100ms
-        }
-      } else if (newResponse.type === 'response_complete') {
-        // Finalize the response
-        setMessages(prev => {
-          let updated = [...prev];
-          if (updated.length > 0) {
-            updated[0].response_text = newResponse.response_text;
-          } else {
-            // Handle case when messages array is empty (first message)
-            updated.push({
-              request_text: currentRequestText.current,
-              response_text: newResponse.response_text
-            });
-          }
-          return updated;
-        });
-        responseBuffer.current = ''; // Clear the buffer
-        clearTimeout(updateTimeout.current); // Clear any pending updates
-        updateTimeout.current = null;
+    if (newResponse.type === 'response_chunk') {
+      responseBuffer.current += newResponse.response_text;
+
+      if (!updateTimeout.current) {
+        updateTimeout.current = setTimeout(() => {
+          setMessages(prev => {
+            const updated = [...prev];
+            if (updated.length > 0) {
+              updated[0].response_text += responseBuffer.current;
+            } else {
+              console.log('No messages to update');
+              updated.push({
+                request_text: currentRequestText.current,
+                response_text: responseBuffer.current,
+              });
+            }
+            responseBuffer.current = '';
+            return updated;
+          });
+          updateTimeout.current = null;
+        }, 100);
       }
+
+    } else if (newResponse.type === 'response_complete') {
+      setMessages(prev => {
+        const updated = [...prev];
+        if (updated.length > 0) {
+          updated[0].response_text = newResponse.response_text;
+        } else {
+          console.log('No messages to update');
+          updated.push({
+            request_text: currentRequestText.current,
+            response_text: newResponse.response_text,
+          });
+        }
+        return updated;
+      });
+      responseBuffer.current = '';
+      clearTimeout(updateTimeout.current);
+      updateTimeout.current = null;
     }
+
   }, [newResponse]);
 
+  // On WebSocket error
   useEffect(() => {
-    if (socketError) setError(socketError);
+    if (socketError) {
+      setError(socketError);
+    }
   }, [socketError]);
 
-  // Send a new user message
+  // Send message (new or existing conversation)
   const sendMessage = async (requestText) => {
     try {
       if (!token) {
-        const resp = await CreateConversation(requestText);
-        setConversations((prev) => [...prev, resp]);
-        // Store the request text for when we receive the first response
+        const conv = await CreateConversation(requestText);
         currentRequestText.current = requestText;
-        navigate(`/c/${resp.token}`, { state: { requestText } });
-      }
-      else {
+        firstMessageRef.current = requestText;
+        setConversations(prev => [...prev, conv]);
+        navigate(`/c/${conv.token}`);
+      } else {
+        currentRequestText.current = requestText;
         setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
         sendOverSocket({ request_text: requestText });
       }
     } catch (err) {
-      console.log(err);
       setError(err);
     }
   };
 
-  // Infinite scroll loader
+  // Send first message when socket is ready
+  useEffect(() => {
+    if (isConnected && firstMessageRef.current) {
+      const msg = firstMessageRef.current;
+      currentRequestText.current = msg;
+      // setMessages([{ request_text: msg, response_text: '' }]);
+      sendOverSocket({ request_text: msg });
+      firstMessageRef.current = null;
+    }
+  }, [isConnected]);
+
+  // Initial or token change: load messages
+  useEffect(() => {
+    if (token) {
+      loadMessages(1);
+    } else {
+      setMessages([]);
+    }
+  }, [token]);
+
   const loadMore = () => {
     if (hasMore && !loading) {
       loadMessages(page + 1);
@@ -137,19 +146,7 @@ export default function useConversation(initialToken) {
     }
   };
 
-  // On token change or first load
-  useEffect(() => {
-    if (token) {
-      loadMessages(1);
-    } else {
-      setMessages([]);
-    }
-  }, [token, location.state]);
-
-  // Clear error state
-  const clearError = () => {
-    setError(null);
-  };
+  const clearError = () => setError(null);
 
   return {
     messages,

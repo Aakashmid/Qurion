@@ -22,7 +22,7 @@ class TokenService:
             httponly=True,
             secure=True,
             samesite="None",
-            path='/api/auth/refresh/',
+            path='/api/auth/',
             max_age=max_age,
         )
 

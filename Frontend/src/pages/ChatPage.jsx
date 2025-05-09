@@ -9,7 +9,6 @@ import useConversation from '../hooks/useConversation';
 
 export default function ChatPage() {
   const { state } = useLocation();
-  const first_question = state ? state.requestText : undefined;
   const { conversation_token } = useParams();
   const navigate = useNavigate();
 
@@ -34,12 +33,6 @@ export default function ChatPage() {
   }, [conversation_token]);
 
 
-  // useEffect(() => {
-  //   if (first_question?.trim() && isConnected) {
-  //     console.log('first question is ',first_question)
-  //     sendMessage(first_question);
-  //   }
-  // }, [first_question,isConnected]);
 
   useEffect(() => {
     if (bottomRef.current && !isFirstRender.current) {

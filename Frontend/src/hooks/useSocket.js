@@ -25,6 +25,7 @@ export default function useSocket(token, ws_url) {
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'error') {
+                console.log(data.message)
                 setErrorMsg(data.message);
             } else if (data.type !== 'request_text') {
                 setNewResponse(data);

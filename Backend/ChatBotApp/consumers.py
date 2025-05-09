@@ -12,14 +12,14 @@ from azure.ai.inference.aio import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 
-endpoint = "https://models.inference.ai.azure.com"
-model_name = "gpt-4o"
+endpoint = "https://models.github.ai/inference"
+model_name = "openai/gpt-4.1"
 token = config("GITHUB_TOKEN")
 
 
 client = ChatCompletionsClient(
     endpoint=endpoint,
-    credential=AzureKeyCredential(token),
+    credential=AzureKeyCredential(token), 
 )
 
 
@@ -50,9 +50,10 @@ async def get_question_response(request_question, token):  # token is unique for
         stream=True
     )
 
+
     async for chunk in response:
         content = chunk.choices[0].delta.content
-        if content:
+        if content: 
             yield content
 
 

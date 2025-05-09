@@ -50,7 +50,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Annotate each conversation with the latest message timestamp and order by creation, update, or message activity
         return (
-            super()
+            super() 
             .get_queryset()
             .filter(user=self.request.user)  # Filter by the authenticated user
             .annotate(

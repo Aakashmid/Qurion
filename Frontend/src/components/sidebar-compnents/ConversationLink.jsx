@@ -44,7 +44,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         setShowRenameModal(false);
     }
 
-    const handleDelete = async () => {
+    const handleDelete = async (conversation) => {
         try {
             const data = await DeleteConversation(conversation.token);
 
@@ -168,7 +168,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
                         top: `${menuPosition.top}px`,
                         right: `${menuPosition.right}px`
                     }}
-                    className="action-menu absolute bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
+                    className="action-menu absolute bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
                     <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-gray-200" onClick={() => { setShowRenameModal(true); setShowActionMenu(false); }}>Rename</div>
                     <div className="py-2 px-4 hover:bg-gray-800 cursor-pointer text-red-600" onClick={() => handleDelete()}>Delete</div>
                 </div>)
