@@ -83,3 +83,6 @@ export const RegisterUser = async (payload) => {
         throw new Error("Error registering user", error)
     }
 }
+
+
+export const FetchUser 

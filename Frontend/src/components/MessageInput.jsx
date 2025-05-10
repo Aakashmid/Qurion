@@ -24,10 +24,13 @@ export default function inputInput({ onSendMessage }) {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+
         onKeyDown={(e) => e.key === 'Enter' ? handleSubmit(e) : null}
         placeholder="Type a input..."
         className="w-full px-2   bg-transparent text-gray-100 focus:outline-none caret-purple"
-      />      <button type="submit" className="p-1 text-gray-400 hover:text-gray-200">
+      />
+
+      <button type="submit" className="p-1 text-gray-400 hover:text-gray-200">
         <IoSend className='w-6 h-auto' />
       </button>
     </form>

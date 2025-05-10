@@ -14,8 +14,7 @@ export default function Login() {
             await login(formData);
             // navigate('/');
         } catch (err) {
-            console.error('Login failed:', err);
-            setError('Unable to login. Please check your credentials and try again.');
+            setError('username or password is incorrect');
         }
     };
 
@@ -30,14 +29,11 @@ export default function Login() {
     return (
         // login form
         <div className="flex flex-col justify-center items-center min-h-screen">
-            {/* <div className="logo text-white mb-10"><Logo/></div> */}
-            <div className="logo text-white mb-10">
-                <Logo/>
+            <div className="bg-gray-100 p-8 rounded-lg shadow-md w-11/12 sm:w-96">
+                <div className="logo text-white mb-10 flex justify-center ">
+                    <Logo />
                 </div>
-            <div className="bg-gray-100 p-8 rounded-lg shadow-md w-11/12 sm:w-96 relative">
-                <h1 className="text-2xl font-bold text-center mb-10 text-gray-900">Login to your Account</h1>
-                {error && <div className="absolute text-red-500 text-center -top-10">{error}</div>}
-                <AuthForm onSubmit={handleLogin} formType="login" />
+                <AuthForm error={error} formType="login" onSubmit={handleLogin} />
             </div>
         </div>
     );

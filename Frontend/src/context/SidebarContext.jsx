@@ -6,6 +6,8 @@ const SidebarContext = createContext();
 
 export const SidebarProvider = ({ children }) => {
     const [isSidebarOpen, toggleSidebarOpen] = useToggle(window.innerWidth >= 768);
+    const [user,setUser] = useState(null);
+    const [convMessages,setConvMessages] = useState({});
     const [conversations, setConversations] = useState([]);
     const [pageNum, setPageNum] = useState(1);
     const [hasMore, setHasMore] = useState(false);
@@ -55,6 +57,8 @@ export const SidebarProvider = ({ children }) => {
                 setConversations,
                 hasMore,
                 loading,
+                user,
+                setUser,
                 
             }}
         >

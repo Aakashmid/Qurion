@@ -2,26 +2,17 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { LuLogOut } from "react-icons/lu";
 import { RiAccountCircle2Line, RiSettings3Line } from 'react-icons/ri';
+import useClickOutside from '../../hooks/useClickOutside';
+import { useSidebar } from '../../context/SidebarContext';
 
 export default function SidebarProfileCard() {
     const [isOpen, setIsOpen] = useState(false);
+    const {user} = useSidebar();
     const popoverRef = useRef(null);
 
     const { logout } = useAuth();
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        }
-    }, [])
-
+    useClickOutside(popoverRef, () => setIsOpen(false));
     return (
         <div ref={popoverRef} className={`${isOpen ? 'bg-gray-800' : 'bg-gray-900'} sidebar-bottom  hover:bg-gray-800 transition-colors active:bg-gray-800 relative`}>
             {/* onclick profile open popover  */}
@@ -32,8 +23,8 @@ export default function SidebarProfileCard() {
                     <span className="text-white font-medium">U</span>
                 </div>
                 <div className="user-info">
-                    <h4 className="font-medium">User Name</h4>
-                    <p className="text-xs text-gray-300">user@example.com</p>
+                    <h4 className="font-medium">{user.name ? user.name :user.username}</h4>
+                    <p className="text-xs text-gray-300">{user.email ? user.email :user.username}</p>       
                 </div>
             </div>
 

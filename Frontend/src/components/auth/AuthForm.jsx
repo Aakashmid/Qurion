@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export default function AuthForm({ onSubmit, formType }) {
+export default function AuthForm({ onSubmit, formType, error }) {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username_or_email: '',
@@ -30,7 +30,7 @@ export default function AuthForm({ onSubmit, formType }) {
             value={formData.username_or_email}
             onChange={handleInputChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Enter your email or username"
+            placeholder="email or username"
           />
         </div>
         <div>
@@ -41,9 +41,13 @@ export default function AuthForm({ onSubmit, formType }) {
             value={formData.password}
             onChange={handleInputChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Enter your password"
+            placeholder="password"
           />
           <div className="mt-2">
+
+            <div className={`p-1 text-[13px] justify-center text-red-600 ${error ? 'flex translate-y-0 ':'hidden -translate-y-2'} transition-all duration-200`}>
+              {error} 
+            </div>
             <p className="">
               {formType === 'login' ? (
                 <>Don't have an account? <span className="text-purple cursor-pointer hover:underline underline-offset-1" onClick={() => navigate('/auth/register')}>Create one</span></>
@@ -67,6 +71,7 @@ export default function AuthForm({ onSubmit, formType }) {
             <span className="px-2 bg-gray-100 text-gray-500">Or continue with</span>
           </div>
         </div>
+
 
         {/* Google Login Button */}
         <button

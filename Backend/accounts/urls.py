@@ -4,8 +4,6 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
 
-router = DefaultRouter()
-router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
     # path('api/auth/', include('dj_rest_auth.urls')),
@@ -15,6 +13,5 @@ urlpatterns = [
     path('api/auth/logout/', LogoutView.as_view(), name='logout'),
     
     path('api/auth/refresh/',CustomTokenRefreshView.as_view(), name='token_refresh'),  
-
-    path('api/', include(router.urls)),
+    path('api/user/',UserViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='user-detail'),
 ]

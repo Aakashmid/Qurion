@@ -8,6 +8,7 @@ import { DeleteConversation } from '../services/apiServices';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import { LuTrash2 } from 'react-icons/lu';
 import { BsShare } from "react-icons/bs";
+import useClickOutside from '../hooks/useClickOutside';
 
 export default function Header() {
     const { isSidebarOpen, toggleSidebarOpen } = useSidebar();
@@ -16,6 +17,11 @@ export default function Header() {
     const { setConversations } = useSidebar();
     const location = useLocation();
     const navigate = useNavigate();
+    const menuRef = useRef();
+
+    // Use the custom hook to close the menu on outside click
+    useClickOutside(menuRef, () => setIsMenuOpen(false));
+
     const handleCreateNewChat = () => {
         console.log('new chat created');
         navigate('/');
@@ -32,26 +38,11 @@ export default function Header() {
         }
     }
 
-
     const isNewChat = location.pathname === '/';
-
-    const popoverRef = useRef(null);
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-                setIsMenuOpen(false);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        }
-    }, [])
 
     return (
 
-        <nav ref={popoverRef}  className=' p-4   w-full  bg-gray-950  h-16 border-b-[0.5px] border-gray-800 relative '>
+        <nav ref={menuRef} className=' p-4   w-full  bg-gray-950  h-16 border-b-[0.5px] border-gray-800 relative '>
             {/* header for large screen  */}
             <div className="items-center justify-between   h-full md:flex hidden">
                 <div className="flex justify-between items-center md:justify-normal gap-5">
@@ -74,18 +65,18 @@ export default function Header() {
                 </div>
             </div>
 
-            {!isMenuOpen &&  conv_token &&
-                <div  className="rounded-xl absolute top-14 right-8 bg-gray-900 border-gray-800 border p-2 min-w-[200px] z-10">
-                    <ul className='flex-col space-y-2'>
+            {isMenuOpen && conv_token &&
+                <div className="rounded-xl absolute  top-14 right-8 bg-gray-900 border-gray-800 border p-2 max-w-fit z-10">
+                    <ul className='flex-col space-y-2 '>
                         <li>
-                            <button className="w-full text-left px-3 py-2 text-gray-200 hover:bg-gray-800 rounded-lg flex items-center gap-4">
-                                <BsShare className=' h-5 w-auto' />
+                            <button className="w-full text-sm text-left px-3 py-2 text-gray-200 hover:bg-gray-800 rounded-lg flex items-center gap-4">
+                                <BsShare className=' h-4 w-auto' />
                                 Share Link
                             </button>
                         </li>
                         <li>
-                            <button onClick={() => handleDelete()} className="w-full text-left px-3 py-2  hover:bg-gray-800 rounded-lg flex items-center gap-4 text-gray-200">
-                                <LuTrash2 className='h-5 w-auto text-red-500' />
+                            <button onClick={() => handleDelete()} className="w-full text-sm text-left px-3 py-2  hover:bg-gray-800 rounded-lg flex items-center gap-4 text-gray-200">
+                                <LuTrash2 className='h-4 w-auto text-red-500' />
                                 Delete Chat
                             </button>
                         </li>

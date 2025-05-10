@@ -4,6 +4,7 @@ import { DeleteConversation, UpdateConversation } from '../../services/apiServic
 import { useLongPress } from 'use-long-press';
 import { useSidebar } from '../../context/SidebarContext';
 import { useNavigate } from 'react-router-dom';
+import useClickOutside from '../../hooks/useClickOutside';
 
 export default function ConversationLink({ conversation, onClickLink, selectedConversation, }) {
     const [showOptionIcon, setShowOptionIcon] = useState(false);
@@ -44,10 +45,9 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         setShowRenameModal(false);
     }
 
-    const handleDelete = async (conversation) => {
+    const handleDelete = async () => {
         try {
             const data = await DeleteConversation(conversation.token);
-
             setConversations((prevConvs) => prevConvs.filter((con) => con.id !== conversation.id));
             if (selectedConversation === conversation.id) {
                 navigate('/');
@@ -61,6 +61,10 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
     const convLinkRef = useRef();
     const threeDotRef = useRef();
     const menuRef = useRef();
+    const renameRef = useRef();
+
+    useClickOutside(menuRef, () => setShowActionMenu(false));
+    useClickOutside(renameRef, () => setShowRenameModal(false));
 
     const handleConversationClick = (event) => {
         if (!threeDotRef.current?.contains(event.target)) {
@@ -69,6 +73,8 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         }
     }
 
+
+    // have to update
     const calculateMenuPosition = () => {
         if (convLinkRef.current && menuRef.current) {
             const linkRect = convLinkRef.current.getBoundingClientRect();
@@ -76,7 +82,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
             const viewportHeight = window.innerHeight;
             const viewportWidth = window.innerWidth;
 
-            let top = 0;
+            let top = 10;
             let right = 4;
 
             // Check if menu would go below viewport
@@ -99,20 +105,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
         }
     }, [showActionMenu]);
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (convLinkRef.current && !convLinkRef.current.contains(e.target)) {
-                setShowActionMenu(false);
-                setShowRenameModal(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
+    
     const handleLongPress = useLongPress(() => {
         setShowActionMenu(true);
     }, {
@@ -139,7 +132,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
                     }
                 </div>
                 :
-                <div className="rename-modal" >
+                <div className="rename-modal" ref={renameRef} >
                     <input
                         type="text"
                         className="rename-input w-full bg-gray-950 text-gray-200 px-3 py-2 rounded-lg focus:outline-none "

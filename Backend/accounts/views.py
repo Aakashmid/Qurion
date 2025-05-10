@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied , MethodNotAllowed
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -85,7 +85,8 @@ class RegisterView(APIView):
                 'User registered successfully',
                 status.HTTP_201_CREATED
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_message = next(iter(serializer.errors.values()))[0]
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -101,7 +102,9 @@ class LoginView(APIView):
                 'Login successful',
                 status.HTTP_200_OK
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_message = next(iter(serializer.errors.values()))[0]
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class LogoutView(APIView):
@@ -129,8 +132,19 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def update(self, request, *args, **kwargs):
+    def get_object(self):    
+        return self.request.user
+
+    def list(self, request, *args, **kwargs):
+        # Disable the list method
+        raise MethodNotAllowed("GET", detail="Listing users is not allowed.")
+
+    def retrieve(self, request, *args, **kwargs):
+        # Retrieve the current user's details
         user = self.get_object()
-        if user != request.user:
-            raise PermissionDenied("You do not have permission to update another user's details.")
-        return super().update(request, *args, **kwargs)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)

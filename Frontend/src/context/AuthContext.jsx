@@ -2,12 +2,14 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import { useSidebar } from './SidebarContext';
 
 const AuthContext = createContext({
   accessToken: null,
   login: async () => { },
   logout: async () => { },
   register: async () => { },
+  fetchUser: async () => { },
 });
 
 
@@ -17,10 +19,17 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [initialized, setInitialized] = useState(false);
   const accessTokenRef = useRef(null);
+  const { setUser } = useSidebar();
   const navigate = useNavigate();
 
   useEffect(() => {
     accessTokenRef.current = accessToken;
+    if (accessToken) {
+      const user = authActions.fetchUser();
+      if (user) {
+        setUser(user);
+      }
+    }
   }, [accessToken]);
 
   const handleAuthResponse = (data) => {
@@ -52,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
 
-  
+
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use((config) => {
       const token = accessTokenRef.current;
@@ -106,6 +115,16 @@ export const AuthProvider = ({ children }) => {
     logout: async () => {
       await api.post('/auth/logout/', {});
       setAccessToken(null);
+    },
+    fetchUser: async () => {
+      try {
+        const { data } = await api.get('/auth/user/');
+        console.log(data)
+        return data;
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+      }
     }
   };
 
