@@ -2,10 +2,10 @@ import React, { use, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
-import { Question, Response } from '../components/chat-page/SmallComponents';
 import { IoClose, IoReload } from 'react-icons/io5';
-import { HiArrowDown } from 'react-icons/hi2';
 import useConversation from '../hooks/useConversation';
+import Question from '../components/chat-page/Question';
+import Response from '../components/chat-page/Response';
 
 export default function ChatPage() {
   const { state } = useLocation();
@@ -20,6 +20,7 @@ export default function ChatPage() {
     loadMore,
     clearError,
     isConnected,
+    isWaiting
   } = useConversation(conversation_token);
 
 
@@ -55,11 +56,16 @@ export default function ChatPage() {
           <div className="flex flex-col  chat-container  max-w-[48rem] mx-auto">
 
             {/* messages container */}
-            <div className="  text-sm messages-container flex flex-col-reverse  ">
+            <div className=" messages-container flex flex-col-reverse  ">
               {loading && <div>Loading…</div>}
               {messages.map((m, i) => (
                 <div className='py-2' key={i}>
                   <Question text={m.request_text} />
+                  {isWaiting && i === 0 &&
+                    <div className="flex justify-start items-center py-2 px-2">
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                    </div>                  }
+                  <div className=""></div>
                   <Response text={m.response_text} />
                 </div>
               ))}

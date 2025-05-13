@@ -84,5 +84,3 @@ export const RegisterUser = async (payload) => {
     }
 }
 
-
-export const FetchUser 

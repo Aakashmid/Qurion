@@ -22,7 +22,7 @@ class TokenService:
             httponly=True,
             secure=True,
             samesite="None",
-            path='/api/auth/',
+            path='/',
             max_age=max_age,
         )
 
@@ -108,7 +108,6 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get('refresh_token')
@@ -128,6 +127,7 @@ class LogoutView(APIView):
             )
 
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -144,7 +144,30 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         serializer = self.get_serializer(user)
         return Response(serializer.data)
-    
+
+    #  delete user , before that also black list his token
     def destroy(self, request, *args, **kwargs):
-        super().destroy(request, *args, **kwargs)
-        return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        # Blacklist the refresh token
+        refresh_token = request.COOKIES.get('refresh_token')
+        if refresh_token:
+            print(refresh_token)
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+
+            except Exception as e:
+                return Response(
+                    {'error': 'Failed to blacklist token: {}'.format(str(e))},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+
+            response = super().destroy(request, *args, **kwargs)  # Call the parent destroy method
+            response.delete_cookie('refresh_token')  # Remove the refresh token cookie
+            return response
+    
+        else:
+            return Response(
+                {'error': 'Refresh token not found in cookies'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

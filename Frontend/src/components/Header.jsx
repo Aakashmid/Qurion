@@ -9,14 +9,19 @@ import { IoShareSocialOutline } from 'react-icons/io5';
 import { LuTrash2 } from 'react-icons/lu';
 import { BsShare } from "react-icons/bs";
 import useClickOutside from '../hooks/useClickOutside';
+import useToggle from '../hooks/useToggle';
+import ShareModal from './header-components/ShareModal';
 
 export default function Header() {
     const { isSidebarOpen, toggleSidebarOpen } = useSidebar();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [showShareModal, toggleShareModal] = useToggle();
     const { conversation_token: conv_token } = useParams();
     const { setConversations } = useSidebar();
     const location = useLocation();
     const navigate = useNavigate();
+    const {conversation_token} = useParams();
+
     const menuRef = useRef();
 
     // Use the custom hook to close the menu on outside click
@@ -38,6 +43,10 @@ export default function Header() {
         }
     }
 
+    const handleShare = () => {
+        toggleShareModal();
+        setIsMenuOpen(false);
+    }
     const isNewChat = location.pathname === '/';
 
     return (
@@ -69,7 +78,7 @@ export default function Header() {
                 <div className="rounded-xl absolute  top-14 right-8 bg-gray-900 border-gray-800 border p-2 max-w-fit z-10">
                     <ul className='flex-col space-y-2 '>
                         <li>
-                            <button className="w-full text-sm text-left px-3 py-2 text-gray-200 hover:bg-gray-800 rounded-lg flex items-center gap-4">
+                            <button onClick={handleShare} className="w-full text-sm text-left px-3 py-2 text-gray-200 hover:bg-gray-800 rounded-lg flex items-center gap-4">
                                 <BsShare className=' h-4 w-auto' />
                                 Share Link
                             </button>
@@ -81,6 +90,15 @@ export default function Header() {
                             </button>
                         </li>
                     </ul>
+                </div>
+            }
+
+            {showShareModal && conversation_token && 
+                <div className="fixed inset-0 h-[100vh]  flex items-center justify-center z-30">
+                    <span onClick={()=>toggleShareModal()} className="w-full h-full fixed bg-black/50"></span>
+                    <div className="z-40 w-full max-w-md">
+                        <ShareModal toggleShareModal={toggleShareModal} conv_token={conversation_token}/>
+                    </div>
                 </div>
             }
         </nav>

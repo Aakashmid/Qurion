@@ -12,7 +12,6 @@ const AuthContext = createContext({
   fetchUser: async () => { },
 });
 
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -25,12 +24,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     accessTokenRef.current = accessToken;
     if (accessToken) {
-      const user = authActions.fetchUser();
-      if (user) {
-        setUser(user);
-      }
+      const fetchUserData = async () => {
+        const user = await authActions.fetchUser();
+        if (user) {
+          setUser(user);
+        }
+      };
+      fetchUserData();
     }
-  }, [accessToken]);
+  }, [accessToken, setUser]);
 
   const handleAuthResponse = (data) => {
     setAccessToken(data.access);
@@ -43,10 +45,10 @@ export const AuthProvider = ({ children }) => {
       return handleAuthResponse(data);
     } catch (err) {
       console.warn('No valid refresh token - user needs to login');
+      setAccessToken(null); // Clear the access token
       return null;
     }
   };
-
 
   // initializing the accessToken
   useEffect(() => {
@@ -60,8 +62,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-
-
+  // initializing the api interceptors
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use((config) => {
       const token = accessTokenRef.current;
@@ -73,33 +74,43 @@ export const AuthProvider = ({ children }) => {
     return () => api.interceptors.request.eject(requestInterceptor);
   }, []);
 
-
-
+  // Response interceptor for handling 401 errors
   useEffect(() => {
     const responseInterceptor = api.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        
+        // Only try to refresh the token if:
+        //  get a 401 error
+        //  haven't already tried to retry this request
+        //  have a valid access token reference
+        if (error.response?.status === 401 && !originalRequest._retry && accessTokenRef.current) {
           originalRequest._retry = true;
+          
           try {
             const newToken = await attemptSilentRefresh();
             if (newToken) {
+              // Update the auth header and retry the original request
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               return api(originalRequest);
+            } else {
+              navigate('/auth/login');
+              return Promise.reject(error);
             }
           } catch (refreshError) {
-            setAccessToken(null);
+            console.error('Refresh token is invalid or expired:', refreshError);
             navigate('/auth/login');
             return Promise.reject(refreshError);
           }
         }
+        
         return Promise.reject(error);
       }
     );
+    
     return () => api.interceptors.response.eject(responseInterceptor);
   }, [navigate]);
-
 
   const authActions = {
     register: async (userData) => {
@@ -113,13 +124,19 @@ export const AuthProvider = ({ children }) => {
     },
 
     logout: async () => {
-      await api.post('/auth/logout/', {});
-      setAccessToken(null);
+      try {
+        await api.post('/auth/logout/', {});
+      } catch (error) {
+        console.error('Error during logout:', error);
+      } finally {
+        setAccessToken(null);
+        setUser(null); // Clear user data on logout
+      }
     },
+    
     fetchUser: async () => {
       try {
-        const { data } = await api.get('/auth/user/');
-        console.log(data)
+        const { data } = await api.get('/user/');
         return data;
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -138,5 +155,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-

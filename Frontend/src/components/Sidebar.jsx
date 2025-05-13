@@ -3,10 +3,10 @@ import React, { use, useEffect, useRef, useState } from 'react';
 import { checkServerStatus, fetchConversations } from '../services/apiServices';
 import { IoMenu, IoReload, IoSearch } from 'react-icons/io5';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ConversationLink from './sidebar-compnents/ConversationLink';
+import ConversationLink from './sidebar-components/ConversationLink';
 import { RiChatNewLine } from 'react-icons/ri';
-import SidebarTop from './sidebar-compnents/SidebarTop';
-import SidebarProfileCard from './sidebar-compnents/SidebarProfileCard';
+import SidebarTop from './sidebar-components/SidebarTop';
+import SidebarProfileCard from './sidebar-components/SidebarProfileCard';
 
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';

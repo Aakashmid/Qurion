@@ -19,7 +19,7 @@ export default function Register() {
         const errorMessage = err.response.data.error;
         setError(errorMessage); // Display the error message to the user
       } else {
-        console.error('Error:', error.message);
+        console.error('Error:', error);
         setError('An unexpected error occurred');
       }
     }

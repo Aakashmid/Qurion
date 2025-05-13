@@ -121,7 +121,7 @@ export default function ConversationLink({ conversation, onClickLink, selectedCo
             onMouseLeave={handleMouseLeave}
         >
             {!showRenameModal ?
-                <div {...handleLongPress()} onClick={(e) => handleConversationClick(e)} className={`${selectedConversation === conversation.id ? 'bg-gray-800' : ''} relative  flex flex-col overflow-hidden px-3 py-2 hover:bg-gray-800 cursor-pointer rounded-lg transition-colors duration-200`}>
+                <div {...handleLongPress()} onClick={(e) => handleConversationClick(e)} className={`${selectedConversation === conversation.id ? 'bg-gray-800' : 'hover:bg-gray-800/50'} relative  flex flex-col overflow-hidden px-3 py-2  cursor-pointer rounded-lg transition-colors duration-200`}>
                     <p className='text-gray-200 font-medium'>{conversationName.length > 30 ? conversationName.substring(0, 30) + '...' : conversationName}</p>
                     {showOptionIcon &&
                         <div ref={threeDotRef} id='three-dot' onClick={(e) => {

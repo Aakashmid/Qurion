@@ -11,6 +11,7 @@ export default function useConversation(initialToken) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false); // this is for waiting for response from socket
   const [error, setError] = useState(null);
   const { setConversations } = useSidebar();
   const navigate = useNavigate();
@@ -84,6 +85,7 @@ export default function useConversation(initialToken) {
             response_text: newResponse.response_text,
           });
         }
+        setIsWaiting(false);
         return updated;
       });
       responseBuffer.current = '';
@@ -110,6 +112,7 @@ export default function useConversation(initialToken) {
         setConversations(prev => [...prev, conv]);
         navigate(`/c/${conv.token}`);
       } else {
+        setIsWaiting(true);
         currentRequestText.current = requestText;
         setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
         sendOverSocket({ request_text: requestText });
@@ -119,12 +122,14 @@ export default function useConversation(initialToken) {
     }
   };
 
+  
   // Send first message when socket is ready
   useEffect(() => {
     if (isConnected && firstMessageRef.current) {
+      setIsWaiting(true);
       const msg = firstMessageRef.current;
       currentRequestText.current = msg;
-      // setMessages([{ request_text: msg, response_text: '' }]);
+      setMessages([{ request_text: msg, response_text:'' }]);
       sendOverSocket({ request_text: msg });
       firstMessageRef.current = null;
     }
@@ -156,5 +161,6 @@ export default function useConversation(initialToken) {
     loadMore,
     isConnected,
     clearError,
+    isWaiting,
   };
 }
