@@ -85,17 +85,17 @@ const Response = ({ text }) => {
                         },
 
                         // Handle paragraphs with consistent spacing
-                        p: ({ node, ...props }) => <p className="my-3 leading-relaxed" {...props} />,
+                        p: ({ node, ...props }) => <p className="my-2 leading-relaxed" {...props} />,
 
                         // Handle headings with consistent spacing
-                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold my-4" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold my-3" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-lg font-bold my-3" {...props} />,
+                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold my-2" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold my-1" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-lg font-bold my-1" {...props} />,
 
                         // Handle lists with consistent spacing
-                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 my-3" {...props} />,
-                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 my-3" {...props} />,
-                        li: ({ node, ...props }) => <li className="my-2" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 my-2" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 my-2" {...props} />,
+                        li: ({ node, ...props }) => <li className="my-1" {...props} />,
 
                         // Handle block quotes with consistent spacing
                         blockquote: ({ node, ...props }) => (
@@ -104,7 +104,7 @@ const Response = ({ text }) => {
 
                         // Handle tables with consistent spacing
                         table: ({ node, ...props }) => (
-                            <div className="overflow-x-auto my-4">
+                            <div className="overflow-x-auto my-3">
                                 <table className="min-w-full border-collapse border border-gray-700" {...props} />
                             </div>
                         ),

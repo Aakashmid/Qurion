@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.filters import OrderingFilter
+from rest_framework import filters
 from django.db.models import Max
 
 
@@ -46,13 +46,13 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     lookup_field = 'token'
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name','messages__request_text']
 
     def get_queryset(self):
         # Annotate each conversation with the latest message timestamp and order by creation, update, or message activity
         return (
-            super() 
-            .get_queryset()
-            .filter(user=self.request.user)  # Filter by the authenticated user
+            self.request.user.conversations.all()
             .annotate(
                 latest_message_time=Max('messages__timestamp')  # Annotate with the latest message timestamp
             )

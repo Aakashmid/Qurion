@@ -20,7 +20,8 @@ export default function ChatPage() {
     loadMore,
     clearError,
     isConnected,
-    isWaiting
+    isStreaming,
+    stopStreaming,
   } = useConversation(conversation_token);
 
 
@@ -61,7 +62,7 @@ export default function ChatPage() {
               {messages.map((m, i) => (
                 <div className='py-2' key={i}>
                   <Question text={m.request_text} />
-                  {isWaiting && i === 0 &&
+                  {isStreaming && i === 0 &&
                     <div className="flex justify-start items-center py-2 px-2">
                         <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
                     </div>                  }
@@ -89,7 +90,7 @@ export default function ChatPage() {
         </div>
 
         <div className="w-full bg-gray-800 relative ">
-          <MessageInput onSendMessage={sendMessage} />
+          <MessageInput onSendMessage={sendMessage}  stopStreaming={stopStreaming} isStreaming={isStreaming} />
         </div>
       </div>
     </HomePageLayout>

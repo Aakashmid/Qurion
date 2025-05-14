@@ -7,7 +7,6 @@ const HomePageLayout = ({ children }) => {
     const { isSidebarOpen, toggleSidebarOpen } = useSidebar();
 
     
-    // have to solve inconsistency in sidebar open and close   , also have to adjust height of layout to completely take screen
     return (
         <>
             <header className={`${isSidebarOpen ? 'md:ml-[33%] xl:ml-[25%] ' : 'md:ml-0 xl:ml-0'} transition-all duration-300 ease-linear`}>

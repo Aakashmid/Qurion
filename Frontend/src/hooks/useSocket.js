@@ -34,6 +34,7 @@ export default function useSocket(token, ws_url) {
 
         socket.onclose = () => {
             setIsConnected(false);
+            
         };
 
         socket.onerror = (error) => {
@@ -65,5 +66,17 @@ export default function useSocket(token, ws_url) {
         }
     };
 
-    return [isConnected, newResponse, sendMessage, errorMsg];
+    const stopStreaming = ()=>{
+        if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN){
+            try {
+                console.log('stop streaming is called in websocket hook');
+                socketRef.current.send(JSON.stringify({ type: 'stop_streaming' }));
+            } catch (err) {
+                console.error(err);
+                setErrorMsg(err);
+            }
+        }
+    }
+
+    return [isConnected, newResponse, sendMessage, errorMsg,stopStreaming];
 }

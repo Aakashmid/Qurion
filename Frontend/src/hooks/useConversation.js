@@ -11,7 +11,7 @@ export default function useConversation(initialToken) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isWaiting, setIsWaiting] = useState(false); // this is for waiting for response from socket
+  const [isStreaming, setIsStreaming] = useState(false); // this is for waiting for response from socket
   const [error, setError] = useState(null);
   const { setConversations } = useSidebar();
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function useConversation(initialToken) {
   const responseBuffer = useRef('');
   const updateTimeout = useRef(null);
 
-  const [isConnected, newResponse, sendOverSocket, socketError] =
+  const [isConnected, newResponse, sendOverSocket, socketError, stopStreaming] =
     useSocket(token, import.meta.env.VITE_WS_CONVERSATION_URL);
 
   // Sync initial token
@@ -85,9 +85,28 @@ export default function useConversation(initialToken) {
             response_text: newResponse.response_text,
           });
         }
-        setIsWaiting(false);
         return updated;
       });
+      setIsStreaming(false);
+      responseBuffer.current = '';
+      clearTimeout(updateTimeout.current);
+      updateTimeout.current = null;
+    }
+    else if (newResponse.type === 'streaming_stopped') {
+      console.log('streaming stopped')
+      setMessages(prev => {
+        const updated = [...prev];
+        if (updated.length > 0) {
+          updated[0].response_text = newResponse.response_text;
+        } else {
+          updated.push({
+            request_text: currentRequestText.current,
+            response_text: newResponse.response_text,
+          });
+        }
+        return updated;
+      });
+      setIsStreaming(false);
       responseBuffer.current = '';
       clearTimeout(updateTimeout.current);
       updateTimeout.current = null;
@@ -112,7 +131,7 @@ export default function useConversation(initialToken) {
         setConversations(prev => [...prev, conv]);
         navigate(`/c/${conv.token}`);
       } else {
-        setIsWaiting(true);
+        setIsStreaming(true);
         currentRequestText.current = requestText;
         setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
         sendOverSocket({ request_text: requestText });
@@ -122,14 +141,14 @@ export default function useConversation(initialToken) {
     }
   };
 
-  
+
   // Send first message when socket is ready
   useEffect(() => {
     if (isConnected && firstMessageRef.current) {
-      setIsWaiting(true);
+      setIsStreaming(true);
       const msg = firstMessageRef.current;
       currentRequestText.current = msg;
-      setMessages([{ request_text: msg, response_text:'' }]);
+      setMessages([{ request_text: msg, response_text: '' }]);
       sendOverSocket({ request_text: msg });
       firstMessageRef.current = null;
     }
@@ -161,6 +180,7 @@ export default function useConversation(initialToken) {
     loadMore,
     isConnected,
     clearError,
-    isWaiting,
+    isStreaming,
+    stopStreaming,
   };
 }
