@@ -11,7 +11,7 @@ export default function useConversation(initialToken) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false); // this is for waiting for response from socket
+  const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState(null);
   const { setConversations } = useSidebar();
   const navigate = useNavigate();
@@ -31,12 +31,10 @@ export default function useConversation(initialToken) {
 
   // Fetch paginated messages
   const loadMessages = useCallback(async (pageNum = 1) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await fetchConversationMessages(token, pageNum);
-      setMessages(prev =>
-        pageNum === 1 ? data.results : [...prev, ...data.results]
-      );
+      setMessages(prev => (pageNum === 1 ? data.results : [...prev, ...data.results]));
       setHasMore(!!data.next);
     } catch (err) {
       console.error(err);
@@ -52,71 +50,41 @@ export default function useConversation(initialToken) {
 
     if (newResponse.type === 'response_chunk') {
       responseBuffer.current += newResponse.response_text;
-
       if (!updateTimeout.current) {
         updateTimeout.current = setTimeout(() => {
           setMessages(prev => {
-            const updated = [...prev];
-            if (updated.length > 0) {
-              updated[0].response_text += responseBuffer.current;
+            if (prev.length > 0) {
+              return [{ ...prev[0], response_text: prev[0].response_text + responseBuffer.current }, ...prev.slice(1)];
             } else {
-              console.log('No messages to update');
-              updated.push({
-                request_text: currentRequestText.current,
-                response_text: responseBuffer.current,
-              });
+              return [{ request_text: currentRequestText.current, response_text: responseBuffer.current }];
             }
-            responseBuffer.current = '';
-            return updated;
           });
+          responseBuffer.current = '';
           updateTimeout.current = null;
         }, 100);
       }
-
-    } else if (newResponse.type === 'response_complete') {
+    } else if (newResponse.type === 'response_complete' || newResponse.type === 'streaming_stopped') {
       setMessages(prev => {
-        const updated = [...prev];
-        if (updated.length > 0) {
-          updated[0].response_text = newResponse.response_text;
+        if (prev.length > 0) {
+          return [{ ...prev[0], response_text: newResponse.response_text }, ...prev.slice(1)];
         } else {
-          console.log('No messages to update');
-          updated.push({
-            request_text: currentRequestText.current,
-            response_text: newResponse.response_text,
-          });
+          return [{ request_text: currentRequestText.current, response_text: newResponse.response_text }];
         }
-        return updated;
       });
       setIsStreaming(false);
       responseBuffer.current = '';
       clearTimeout(updateTimeout.current);
       updateTimeout.current = null;
+    } else if (newResponse.type === 'request_text') {
+      setIsStreaming(true);
+      setMessages(prev => [{ request_text: newResponse.request_text, response_text: '' }, ...prev]);
     }
-    else if (newResponse.type === 'streaming_stopped') {
-      console.log('streaming stopped')
-      setMessages(prev => {
-        const updated = [...prev];
-        if (updated.length > 0) {
-          updated[0].response_text = newResponse.response_text;
-        } else {
-          updated.push({
-            request_text: currentRequestText.current,
-            response_text: newResponse.response_text,
-          });
-        }
-        return updated;
-      });
-      setIsStreaming(false);
-      responseBuffer.current = '';
-      clearTimeout(updateTimeout.current);
-      updateTimeout.current = null;
-    }
-
   }, [newResponse]);
 
   // On WebSocket error
   useEffect(() => {
     if (socketError) {
+      setIsStreaming(false);
       setError(socketError);
     }
   }, [socketError]);
@@ -133,14 +101,12 @@ export default function useConversation(initialToken) {
       } else {
         setIsStreaming(true);
         currentRequestText.current = requestText;
-        setMessages(prev => [{ request_text: requestText, response_text: '' }, ...prev]);
-        sendOverSocket({ request_text: requestText });
+        sendOverSocket({ request_text: requestText, type: 'start_streaming' });
       }
     } catch (err) {
       setError(err);
     }
   };
-
 
   // Send first message when socket is ready
   useEffect(() => {
@@ -148,8 +114,7 @@ export default function useConversation(initialToken) {
       setIsStreaming(true);
       const msg = firstMessageRef.current;
       currentRequestText.current = msg;
-      setMessages([{ request_text: msg, response_text: '' }]);
-      sendOverSocket({ request_text: msg });
+      sendOverSocket({ request_text: msg, type: 'start_streaming' });
       firstMessageRef.current = null;
     }
   }, [isConnected]);
@@ -161,7 +126,7 @@ export default function useConversation(initialToken) {
     } else {
       setMessages([]);
     }
-  }, [token]);
+  }, [token, loadMessages]);
 
   const loadMore = () => {
     if (hasMore && !loading) {

@@ -10,7 +10,6 @@ import SidebarProfileCard from './sidebar-components/SidebarProfileCard';
 
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
-import { PiCircle } from 'react-icons/pi';
 
 export default function Sidebar() {
   const navigate = useNavigate();

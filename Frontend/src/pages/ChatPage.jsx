@@ -2,7 +2,7 @@ import React, { use, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
-import { IoClose, IoReload } from 'react-icons/io5';
+import { IoArrowDown, IoClose, IoReload } from 'react-icons/io5';
 import useConversation from '../hooks/useConversation';
 import Question from '../components/chat-page/Question';
 import Response from '../components/chat-page/Response';
@@ -48,6 +48,22 @@ export default function ChatPage() {
     console.log(messages);
   }, [messages]);
 
+  const scrollToBottom = () => {
+    // if (bottomRef.current) {
+    //   bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    // }
+  };
+
+  const showScrollButton = () => {
+    if (scrollableRef.current) {
+      const scrollableHeight = scrollableRef.current.scrollHeight;
+      const scrollTop = scrollableRef.current.scrollTop;
+      const clientHeight = scrollableRef.current.clientHeight;
+      const scrollableVisibleHeight = scrollableHeight - scrollTop - clientHeight;
+      return scrollableVisibleHeight < 100;
+    }
+  };
+
   return (
     <HomePageLayout>
       <div className="bg-gray-950 relative ">
@@ -59,19 +75,18 @@ export default function ChatPage() {
             {/* messages container */}
             <div className=" messages-container flex flex-col-reverse  ">
               {loading && <div>Loading…</div>}
-              {messages.map((m, i) => (
+
+              {messages.length > 0 && messages.map((m, i) => (
                 <div className='py-2' key={i}>
                   <Question text={m.request_text} />
                   {isStreaming && i === 0 &&
                     <div className="flex justify-start items-center py-2 px-2">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-                    </div>                  }
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                    </div>}
                   <div className=""></div>
                   <Response text={m.response_text} />
                 </div>
               ))}
-              {/* Dummy div to scroll into view */}
-
             </div>
 
             {error && (
@@ -90,7 +105,11 @@ export default function ChatPage() {
         </div>
 
         <div className="w-full bg-gray-800 relative ">
-          <MessageInput onSendMessage={sendMessage}  stopStreaming={stopStreaming} isStreaming={isStreaming} />
+          {showScrollButton &&
+            <div onClick={scrollToBottom} className="bg-gray-900 rounded-full absolute z-10 -top-10 left-1/2 p-1 cursor-pointer border border-gray-800 hover:bg-gray-800">
+              <IoArrowDown className='h-6 w-auto text-white' />
+            </div>}
+          <MessageInput onSendMessage={sendMessage} stopStreaming={stopStreaming} isStreaming={isStreaming} />
         </div>
       </div>
     </HomePageLayout>

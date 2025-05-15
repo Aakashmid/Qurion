@@ -4,9 +4,12 @@ import { LuLogOut } from "react-icons/lu";
 import { RiAccountCircle2Line, RiSettings3Line } from 'react-icons/ri';
 import useClickOutside from '../../hooks/useClickOutside';
 import { useSidebar } from '../../context/SidebarContext';
+import useToggle from '../../hooks/useToggle';
+import SettingsModal from './SettingsModal';
 
 export default function SidebarProfileCard() {
     const [isOpen, setIsOpen] = useState(false);
+    const [showSettings, toggleShowSettings] = useToggle();
     const { user } = useSidebar();
     const popoverRef = useRef(null);
 
@@ -42,17 +45,23 @@ export default function SidebarProfileCard() {
             {/* Popover Menu */}
             {isOpen && (
                 <div className="absolute bottom-full left-4 w-48 mb-2 bg-gray-800 rounded-lg shadow-lg py-2">
-                    <div className="px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-5">
+                    <button onClick={toggleShowSettings}  className="w-full px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-5">
                         <RiSettings3Line className='h-5 w-auto' />
                         <span>Settings</span>
-                    </div>
+                    </button>
                     <div className="border-t border-gray-700 my-1"></div>
-                    <div onClick={() => logout()} className="px-4 py-2 hover:bg-gray-700 cursor-pointer  flex items-center gap-5">
+                    <button onClick={() => logout()} className="w-full px-4 py-2 hover:bg-gray-700 cursor-pointer  flex items-center gap-5">
                         <LuLogOut className='text-red-400 h-5 w-auto' />
                         <span>Logout</span>
-                    </div>
+                    </button>
                 </div>
             )}
+
+            {showSettings &&
+                <div className="fixed top-0 left-0 w-screen h-screen z-30 bg-black bg-opacity-50 flex items-center justify-center px-10">
+                    <SettingsModal toggleShowSettings={toggleShowSettings} />
+                </div>
+            }
         </div>
     )
 }

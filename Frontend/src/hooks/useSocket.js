@@ -8,7 +8,6 @@ export default function useSocket(token, ws_url) {
 
     useEffect(() => {
         if (!token) {
-            console.log('token is not defined');
             return;
         }
             
@@ -25,9 +24,8 @@ export default function useSocket(token, ws_url) {
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'error') {
-                console.log(data.message)
                 setErrorMsg(data.message);
-            } else if (data.type !== 'request_text') {
+            } else{
                 setNewResponse(data);
             }
         };
@@ -52,7 +50,6 @@ export default function useSocket(token, ws_url) {
 
     const sendMessage = (data) => {
         console.log('send message is called in websocket hook');
-        console.log(data); 
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             try {
                 socketRef.current.send(JSON.stringify(data));
