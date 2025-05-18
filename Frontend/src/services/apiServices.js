@@ -8,12 +8,22 @@ export const checkServerStatus = async () => {
     }
 }
 
-export const fetchConversations = async (page_num =1) => {
+export const fetchConversations = async (page_num =1 , ) => {
     try {
         const res = await api.get(`/conversations/?page=${page_num}`)
         return res.data
     } catch (error) {
         throw new Error("Error fetching conversation")
+    }
+}
+
+export const fetchSearchedConversation = async (searchQuery,page_num=1) => {
+    try {
+        const res = await api.get(`/conversations/?page=${page_num}&search=${searchQuery}`);
+
+;        return res.data;
+    } catch (error) {
+        throw new Error("Error fetching searched conversation");
     }
 }
 

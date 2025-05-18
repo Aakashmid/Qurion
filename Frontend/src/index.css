@@ -67,4 +67,8 @@
   .scrollbar-light::-webkit-scrollbar-thumb:hover {
     background: #888;
   }
+
+  .flex-center{
+    @apply flex justify-center items-center
+  }
 }

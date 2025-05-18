@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useSidebar } from './SidebarContext';
+import { Circle } from '@mui/icons-material';
+import CirculareL1 from '../components/Loaders/CirculareL1';
 
 const AuthContext = createContext({
   accessToken: null,
@@ -80,14 +82,14 @@ export const AuthProvider = ({ children }) => {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        
+
         // Only try to refresh the token if:
         //  get a 401 error
         //  haven't already tried to retry this request
         //  have a valid access token reference
         if (error.response?.status === 401 && !originalRequest._retry && accessTokenRef.current) {
           originalRequest._retry = true;
-          
+
           try {
             const newToken = await attemptSilentRefresh();
             if (newToken) {
@@ -104,11 +106,11 @@ export const AuthProvider = ({ children }) => {
             return Promise.reject(refreshError);
           }
         }
-        
+
         return Promise.reject(error);
       }
     );
-    
+
     return () => api.interceptors.response.eject(responseInterceptor);
   }, [navigate]);
 
@@ -133,7 +135,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null); // Clear user data on logout
       }
     },
-    
+
     fetchUser: async () => {
       try {
         const { data } = await api.get('/user/');
@@ -146,7 +148,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   if (!initialized) {
-    return <div className='text-white'>Loading authentication…</div>;
+    return <div className='w-screen h-screen flex-center  '>
+      <CirculareL1/>
+    </div>;
   }
 
   return (

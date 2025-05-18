@@ -6,20 +6,26 @@ import useClickOutside from '../../hooks/useClickOutside';
 import { useSidebar } from '../../context/SidebarContext';
 import useToggle from '../../hooks/useToggle';
 import SettingsModal from './SettingsModal';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function SidebarProfileCard() {
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, toggleShowSettings] = useToggle();
     const { user } = useSidebar();
     const popoverRef = useRef(null);
-
+    const navigate = useNavigate();
     const { logout } = useAuth();
+    const location = useLocation();
 
     useClickOutside(popoverRef, () => setIsOpen(false));
+
+    // const openSettings = () => {
+    //     window.location.hash = "#settings";
+    // };
+
     return (
         <div ref={popoverRef} className={`${isOpen ? 'bg-gray-800' : 'bg-gray-900'} sidebar-bottom  hover:bg-gray-800 transition-colors active:bg-gray-800 relative`}>
             {/* onclick profile open popover  */}
-
             {user ?
                 <div className="profile-card h-[5rem] flex items-center gap-3 p-4 transition-all rounded-lg cursor-pointer"
                     onClick={() => setIsOpen(!isOpen)}>
@@ -45,7 +51,7 @@ export default function SidebarProfileCard() {
             {/* Popover Menu */}
             {isOpen && (
                 <div className="absolute bottom-full left-4 w-48 mb-2 bg-gray-800 rounded-lg shadow-lg py-2">
-                    <button onClick={toggleShowSettings}  className="w-full px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-5">
+                    <button onClick={()=>{toggleShowSettings();setIsOpen(false)}} className="w-full px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-5">
                         <RiSettings3Line className='h-5 w-auto' />
                         <span>Settings</span>
                     </button>
@@ -56,10 +62,10 @@ export default function SidebarProfileCard() {
                     </button>
                 </div>
             )}
-
-            {showSettings &&
+            {
+                showSettings &&
                 <div className="fixed top-0 left-0 w-screen h-screen z-30 bg-black bg-opacity-50 flex items-center justify-center px-10">
-                    <SettingsModal toggleShowSettings={toggleShowSettings} />
+                    <SettingsModal onClose={toggleShowSettings} />
                 </div>
             }
         </div>

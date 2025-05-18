@@ -17,7 +17,7 @@ export const SidebarProvider = ({ children }) => {
         try {
             setLoading(true);
             const data = await fetchConversations();
-            if (data.results.length > 0) {
+            if (data?.results?.length > 0) {
                 setConversations(data.results);
             }
             setHasMore(data.next !== null);

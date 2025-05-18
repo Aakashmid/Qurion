@@ -9,8 +9,7 @@ import useClickOutside from '../../hooks/useClickOutside';
 export default function SidebarTop() {
     const { isSidebarOpen, toggleSidebarOpen } = useSidebar();
     const [showSearch, ToggleShowSearch] = useToggle(false);
-    const searchRef = useRef();
-    useClickOutside(searchRef, ToggleShowSearch);
+    
     return (
         <div className="p-4 flex items-center justify-between sidebar-top bg-gray-900 border-b border-gray-800 h-16">
             <button className={`open-sidebar text-gray-200 hover:text-white active:text-white rounded-xl `} onClick={toggleSidebarOpen}><TbMenu3 className='w-7 lg:w-8 h-auto' /></button>
@@ -19,7 +18,7 @@ export default function SidebarTop() {
 
             {showSearch &&
                 (
-                    <div ref={searchRef} className="absolute top-0 left-0 w-full p-2 ">
+                    <div  className="fixed h-screen top-0 left-0 w-screen flex justify-center items-center z-10">
                         <SidebarSearchInput ToggleShowSearch={ToggleShowSearch} />
                     </div>
                 )}

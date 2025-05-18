@@ -20,6 +20,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         serif: ['Merriweather', 'serif'],
       },
+      
     },
   },
   plugins: [],
