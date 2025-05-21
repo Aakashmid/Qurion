@@ -27,7 +27,7 @@ export default function MessageInput({ onSendMessage, stopStreaming , isStreamin
         onChange={(e) => setInput(e.target.value)}
 
         onKeyDown={(e) => e.key === 'Enter' ? handleSubmit(e) : null}
-        placeholder="Type a input..."
+        placeholder="Start a new query…"
         className="w-full px-2   bg-transparent text-gray-100 focus:outline-none caret-purple"
       />
 

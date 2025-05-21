@@ -64,7 +64,7 @@ export default function SidebarProfileCard() {
             )}
             {
                 showSettings &&
-                <div className="fixed top-0 left-0 w-screen h-screen z-30 bg-black bg-opacity-50 flex items-center justify-center px-10">
+                <div className="fixed top-0 left-0 w-screen h-screen z-30 bg-black bg-opacity-50 flex items-center justify-center md:px-10 px-4 ">
                     <SettingsModal onClose={toggleShowSettings} />
                 </div>
             }

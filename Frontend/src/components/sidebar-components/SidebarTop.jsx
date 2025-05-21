@@ -18,7 +18,7 @@ export default function SidebarTop() {
 
             {showSearch &&
                 (
-                    <div  className="fixed h-screen top-0 left-0 w-screen flex justify-center items-center z-10">
+                    <div  className="fixed h-screen top-0 left-0 w-screen bg-black bg-opacity-50 flex justify-center items-center z-10">
                         <SidebarSearchInput ToggleShowSearch={ToggleShowSearch} />
                     </div>
                 )}
