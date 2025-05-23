@@ -9,11 +9,13 @@ export default function useConversation(initialToken) {
   const [token, setToken] = useState(null);
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
+  const [isLoadedMore, setIsLoadedMore] = useState(false);  // for ensuer is messages is fetched again on loadmore
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState(null);
   const { setConversations } = useSidebar();
+
   const navigate = useNavigate();
 
   const currentRequestText = useRef('');
@@ -41,6 +43,9 @@ export default function useConversation(initialToken) {
       setError(err);
     } finally {
       setLoading(false);
+      if(pageNum > 1){
+        setIsLoadedMore(true);
+      }
     }
   }, [token]);
 
@@ -142,9 +147,12 @@ export default function useConversation(initialToken) {
     loading,
     error,
     sendMessage,
+    hasMore,
     loadMore,
     isConnected,
     clearError,
+    isLoadedMore,
+    setIsLoadedMore,
     isStreaming,
     stopStreaming,
   };

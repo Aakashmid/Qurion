@@ -32,7 +32,7 @@ def get_conversation_messages(request, token):
     try:
         messages = Message.objects.filter(conversation__token=token).order_by('-timestamp')
         paginator = PageNumberPagination()
-        paginator.page_size = 10
+        paginator.page_size = 5
         paginated_messages = paginator.paginate_queryset(messages, request)
         serializer = MessageSerializer(paginated_messages, many=True)
         return paginator.get_paginated_response(serializer.data)

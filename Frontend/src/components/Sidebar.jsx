@@ -10,6 +10,7 @@ import SidebarProfileCard from './sidebar-components/SidebarProfileCard';
 
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
+import CircualrProgress2 from './Loaders/CircualrProgress2';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -45,25 +46,24 @@ export default function Sidebar() {
 
 
   const bottomRef = useRef(null);
+  const scrollableRef = useRef(null);
 
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     const element = bottomRef.current;
-  //     // if (!element || !hasMore || loading) return;
-
-  //     const rect = element.getBoundingClientRect();
-  //     const isNearBottom = rect.top <= window.innerHeight + 300;
-
-  //     if (isNearBottom) {
-  //       console.log('loaded more');
-  //       loadMoreConversations();
-  //     }
-  //   };
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, []);
+  useEffect(() => {
+    const element = scrollableRef.current;
+    const handleScroll = () => {
+      if (!element || !hasMore || loading) {
+        return;
+      }
+      const isNearBottom = element.scrollTop + element.clientHeight >= element.scrollHeight;
+      if (isNearBottom) {
+        loadMoreConversations();
+      }
+    };
+    element.addEventListener('scroll', handleScroll);
+    return () => {
+      element.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasMore,loading,scrollableRef]);
   return (
     <div className="w-full   text-white h-screen">
       {/* sidebar top */}
@@ -77,17 +77,22 @@ export default function Sidebar() {
               New Chat
             </span>
           </button>
-          {/* <button onClick={()=>{get_conversations()}} className='p-2 bg-gray-200 hover:bg-gray-300 text-black mt-2 rounded-2xl'>Fetch Conversations</button> */}
         </div>
 
         <h3 className="py-1 px-3 text-gray-400 font-semibold text-sm">Recent Conversation</h3>
-        <div className="mt-4 overflow-y-auto scrollbar-dark flex-grow">
+        <div ref={scrollableRef} className="mt-4 overflow-y-auto scrollbar-dark flex-grow">
           <ul className="flex flex-col gap-1 ">
             {conversations.map((conversation) => (
               <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
             ))}
-            {loading && <div className='flex justify-center items-center text-gray-400 text-sm'>Loading…</div>}
-            
+
+            {/* <div className="" ref={bottomRef}></div> */}
+            {loading &&
+              <div className='flex justify-center items-center text-gray-400 text-sm mt-4'>
+                <CircualrProgress2 width={8} />
+              </div>
+            }
+            {/*             
             {hasMore && !loading && (
               <button
                 onClick={loadMoreConversations}
@@ -95,7 +100,7 @@ export default function Sidebar() {
               >
                 Load More <IoReload />
               </button>
-            )}
+            )} */}
 
           </ul>
         </div>

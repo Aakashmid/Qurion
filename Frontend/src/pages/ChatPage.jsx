@@ -6,6 +6,7 @@ import { IoArrowDown, IoClose, IoReload } from 'react-icons/io5';
 import useConversation from '../hooks/useConversation';
 import Question from '../components/chat-page/Question';
 import Response from '../components/chat-page/Response';
+import SomethinkWrongErr from '../components/chat-page/SomethinkWrongErr';
 
 export default function ChatPage() {
   const { state } = useLocation();
@@ -18,6 +19,9 @@ export default function ChatPage() {
     error,
     sendMessage,
     loadMore,
+    isLoadedMore,
+    setIsLoadedMore,
+    hasMore,
     clearError,
     isConnected,
     isStreaming,
@@ -37,15 +41,20 @@ export default function ChatPage() {
 
 
   useEffect(() => {
+    // if(isLoadedMore){
+    //   console.log('dont scrolled')
+    //   setIsLoadedMore(false);
+    //   return ;
+    // }
     if (bottomRef.current && !isFirstRender.current) {
       // Scroll to the bottom only after the first render
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      console.log("scrolled");
     } else if (isFirstRender.current && messages.length > 0) {
       scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
       isFirstRender.current = false; // Mark as no longer the first render
     }
 
-    console.log(messages);
   }, [messages]);
 
   const scrollToBottom = () => {
@@ -72,7 +81,19 @@ export default function ChatPage() {
           className="h-[calc(100vh-10rem)] overflow-y-auto p-4 scrollbar-light relative"
         >
           <div className="flex flex-col chat-container max-w-[48rem] mx-auto">
+            {hasMore && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={loadMore}
+                  className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  Load More Messages
+                </button>
+              </div>
+            )}
+
             {/* messages container */}
+
             <div className="messages-container flex flex-col-reverse">
               {loading && (
                 <div className="flex justify-center items-center py-4 text-gray-400">
@@ -95,31 +116,15 @@ export default function ChatPage() {
               ) : (
                 !loading && (
                   <div className="flex justify-center items-center text-2xl font-semibold  text-gray-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                   How can I  help you today ?
+                    How can I  help you today ?
                   </div>
                 )
               )}
             </div>
 
             {error && (
-              <div className="w-full lg:w-1/2 mx-auto ">
-                <div className="text-red-500 bg-gray-800 flex items-center border border-red-500 rounded-xl px-6 py-4 justify-between">
-                  <button
-                    className="hover:text-red-400 transition-colors"
-                    onClick={() => window.location.reload()}
-                    title="Retry"
-                  >
-                    <IoReload className="h-5 w-auto" />
-                  </button>
-                  <p className="mx-4 text-[16px]">Something went wrong! Please retry.</p>
-                  <button
-                    className="hover:text-gray-300 transition-colors"
-                    onClick={() => clearError()}
-                    title="Dismiss"
-                  >
-                    <IoClose className="h-5 w-auto" />
-                  </button>
-                </div>
+              <div className="w-full  lg:w-fit mx-auto ">
+                <SomethinkWrongErr />
               </div>
             )}
 

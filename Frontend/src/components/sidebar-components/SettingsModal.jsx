@@ -18,7 +18,7 @@ export default function SettingsModal({ onClose }) {
 
 
     return (
-        <div ref={componentRef} className='bg-gray-900 rounded-lg shadow-xl w-full h-[90%]  max-w-xl   text-gray-300'>
+        <div ref={componentRef} className='bg-gray-900 rounded-xl shadow-xl w-full h-[90%]  max-w-xl   text-gray-300 overflow-hidden'>
             <div className='border-b border-gray-700  p-6 h-14 flex justify-between items-center'>
                 <h2 className='text-xl font-semibold text-gray-200'>Settings</h2>
                 <button onClick={() => onClose()} className='text-gray-400 hover:text-gray-200'>
