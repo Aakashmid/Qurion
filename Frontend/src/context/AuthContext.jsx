@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useSidebar } from './SidebarContext';
-import { Circle } from '@mui/icons-material';
 import CirculareL1 from '../components/Loaders/CirculareL1';
 
 const AuthContext = createContext({

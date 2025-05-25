@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
@@ -11,6 +11,7 @@ import SomethinkWrongErr from '../components/chat-page/SomethinkWrongErr';
 export default function ChatPage() {
   const { state } = useLocation();
   const { conversation_token } = useParams();
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -28,50 +29,89 @@ export default function ChatPage() {
     stopStreaming,
   } = useConversation(conversation_token);
 
-
   const scrollableRef = useRef(null);
+  const prevScrollHeight = useRef(null);
   const bottomRef = useRef(null);
-  const isFirstRender = useRef(null); // Track if it's the first render
+  const isFirstRender = useRef(true);
+  const loadingMore = useRef(false);
 
   useEffect(() => {
-    // Reset isFirstRender when conversation_token changes
     isFirstRender.current = true;
   }, [conversation_token]);
 
+  useEffect(() => {
+    const scrollToPosition = () => {
+      if (loadingMore.current && prevScrollHeight.current && scrollableRef.current) {
+        const newScrollHeight = scrollableRef.current.scrollHeight;
+        const scrollPosition = newScrollHeight - prevScrollHeight.current;
+        scrollableRef.current.scrollTop = scrollPosition;
+        prevScrollHeight.current = null;
+        loadingMore.current = false;
+      } else if (!isLoadedMore && !isFirstRender.current && bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      } else if (isFirstRender.current && messages.length > 0 && scrollableRef.current) {
+        scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
+        isFirstRender.current = false;
+      }
+    };
+
+    const timeoutId = setTimeout(scrollToPosition, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages]);
+
 
 
   useEffect(() => {
-    // if(isLoadedMore){
-    //   console.log('dont scrolled')
-    //   setIsLoadedMore(false);
-    //   return ;
-    // }
-    if (bottomRef.current && !isFirstRender.current) {
-      // Scroll to the bottom only after the first render
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-      console.log("scrolled");
-    } else if (isFirstRender.current && messages.length > 0) {
-      scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
-      isFirstRender.current = false; // Mark as no longer the first render
-    }
+    const element = scrollableRef.current;
+    const handleScroll = () => {
+      if (!element || !hasMore || loading || loadingMore.current) {
+        return;
+      }
+      const { scrollTop } = element;
+      if (scrollTop < 100) {
+        loadingMore.current = true;
+        prevScrollHeight.current = element.scrollHeight;
+        loadMore();
+      }
 
-  }, [messages]);
+    };
+
+
+    element.addEventListener('scroll', handleScroll);
+    return () => {
+      element.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasMore, loading, scrollableRef]);
+
+
+
+
+  useEffect(() => {
+    const element = scrollableRef.current;
+    if (!element) return;
+
+    const handleScrollButtonVisibility = () => {
+      const { scrollHeight, scrollTop, clientHeight } = element;
+      // Show button when we're more than 100px from the bottom
+      setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 100);
+    };
+
+    // Check initially
+    handleScrollButtonVisibility();
+
+    // Add event listener
+    element.addEventListener('scroll', handleScrollButtonVisibility);
+    return () => {
+      element.removeEventListener('scroll', handleScrollButtonVisibility);
+    };
+  }, [scrollableRef]);
+
+
 
   const scrollToBottom = () => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const showScrollButton = () => {
-    if (scrollableRef.current) {
-      const scrollableHeight = scrollableRef.current.scrollHeight;
-      const scrollTop = scrollableRef.current.scrollTop;
-      const clientHeight = scrollableRef.current.clientHeight;
-      const scrollableVisibleHeight = scrollableHeight - scrollTop - clientHeight;
-      return scrollableVisibleHeight < 100;
-    }
-  };
 
   return (
     <HomePageLayout>
@@ -81,20 +121,9 @@ export default function ChatPage() {
           className="h-[calc(100vh-10rem)] overflow-y-auto p-4 scrollbar-light relative"
         >
           <div className="flex flex-col chat-container max-w-[48rem] mx-auto">
-            {hasMore && (
-              <div className="flex justify-center py-4">
-                <button
-                  onClick={loadMore}
-                  className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"
-                >
-                  Load More Messages
-                </button>
-              </div>
-            )}
-
-            {/* messages container */}
-
             <div className="messages-container flex flex-col-reverse">
+
+              {/* instead show skelton  here  */}
               {loading && (
                 <div className="flex justify-center items-center py-4 text-gray-400">
                   Loading…
@@ -115,34 +144,31 @@ export default function ChatPage() {
                 ))
               ) : (
                 !loading && (
-                  <div className="flex justify-center items-center text-2xl font-semibold  text-gray-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    How can I  help you today ?
+                  <div className="flex justify-center items-center text-2xl font-semibold text-gray-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    How can I help you today?
                   </div>
                 )
               )}
             </div>
 
             {error && (
-              <div className="w-full  lg:w-fit mx-auto ">
+              <div className="w-full lg:w-fit mx-auto">
                 <SomethinkWrongErr />
               </div>
             )}
 
-            {/* Uncomment to enable scroll-to-bottom button */}
-            {/*
-            {!showScrollButton() && (
-              <div
+            {showScrollBtn && (
+              <button
                 onClick={scrollToBottom}
-                className="bg-gray-900 rounded-full absolute z-10 -top-10 left-1/2 p-1 cursor-pointer border border-gray-800 hover:bg-gray-800"
+                className="bg-gray-900 rounded-full fixed bottom-[6.2rem] right-1/2 translate-x-1/2 p-2 cursor-pointer border border-gray-800 hover:bg-gray-800"
               >
-                <IoArrowDown className="h-6 w-auto text-white" />
-              </div>
+                <IoArrowDown className="h-6 w-6 text-white" />
+              </button>
             )}
-            */}
           </div>
         </div>
 
-        <div className="w-full bg-gray-800 relative ">
+        <div className="w-full bg-gray-800 relative">
           <MessageInput
             onSendMessage={sendMessage}
             stopStreaming={stopStreaming}

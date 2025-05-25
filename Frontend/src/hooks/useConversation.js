@@ -37,15 +37,12 @@ export default function useConversation(initialToken) {
     try {
       const data = await fetchConversationMessages(token, pageNum);
       setMessages(prev => (pageNum === 1 ? data.results : [...prev, ...data.results]));
-      setHasMore(!!data.next);
+      setHasMore(data.next !== null);
     } catch (err) {
       console.error(err);
       setError(err);
     } finally {
       setLoading(false);
-      if(pageNum > 1){
-        setIsLoadedMore(true);
-      }
     }
   }, [token]);
 

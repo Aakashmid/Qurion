@@ -1,6 +1,6 @@
 
-import { useTheme } from '@emotion/react';
 import { AuthProvider } from './context/AuthContext'
+import useTheme from './hooks/useTheme';
 import AppRoutes from './routes/AppRoutes'
 import { useEffect } from 'react';
 

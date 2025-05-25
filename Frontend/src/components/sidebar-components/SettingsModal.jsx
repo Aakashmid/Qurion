@@ -14,6 +14,7 @@ export default function SettingsModal({ onClose }) {
     useClickOutside(componentRef, () => {
         onClose();
     });
+    console.log(user)
 
 
 

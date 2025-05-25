@@ -73,7 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'username', 'email', 'date_joined', 'date_updated')
+        fields = ('id', 'name', 'username', 'email', 'date_joined', 'date_updated' ,'avatar')
 
     def validate_name(self, value):
         # Ensure the name is not empty

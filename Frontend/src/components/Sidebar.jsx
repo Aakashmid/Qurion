@@ -11,6 +11,7 @@ import SidebarProfileCard from './sidebar-components/SidebarProfileCard';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 import CircualrProgress2 from './Loaders/CircualrProgress2';
+import ConvLinkSkel from './skeltons/ConvLinkSkel';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -45,7 +46,6 @@ export default function Sidebar() {
 
 
 
-  const bottomRef = useRef(null);
   const scrollableRef = useRef(null);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function Sidebar() {
     return () => {
       element.removeEventListener('scroll', handleScroll);
     };
-  }, [hasMore,loading,scrollableRef]);
+  }, [hasMore, loading, scrollableRef]);
   return (
     <div className="w-full   text-white h-screen">
       {/* sidebar top */}
@@ -82,26 +82,24 @@ export default function Sidebar() {
         <h3 className="py-1 px-3 text-gray-400 font-semibold text-sm">Recent Conversation</h3>
         <div ref={scrollableRef} className="mt-4 overflow-y-auto scrollbar-dark flex-grow">
           <ul className="flex flex-col gap-1 ">
-            {conversations.map((conversation) => (
+            {conversations ? conversations.map((conversation) => (
               <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
-            ))}
+            ))
+              : (
+                <div className="flex flex-col gap-1">
+                  <ConvLinkSkel />
+                  <ConvLinkSkel />
+                  <ConvLinkSkel />
+                  <ConvLinkSkel />
+                  <ConvLinkSkel />
+                </div>
+              )}
 
-            {/* <div className="" ref={bottomRef}></div> */}
             {loading &&
               <div className='flex justify-center items-center text-gray-400 text-sm mt-4'>
                 <CircualrProgress2 width={8} />
               </div>
             }
-            {/*             
-            {hasMore && !loading && (
-              <button
-                onClick={loadMoreConversations}
-                className="text-sm text-gray-400 hover:text-gray-300 flex items-center gap-4 justify-center"
-              >
-                Load More <IoReload />
-              </button>
-            )} */}
-
           </ul>
         </div>
       </div>
