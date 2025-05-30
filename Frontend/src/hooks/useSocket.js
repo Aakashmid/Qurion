@@ -49,7 +49,6 @@ export default function useSocket(token, ws_url) {
     }, [token, ws_url]);
 
     const sendMessage = (data) => {
-        console.log('send message is called in websocket hook');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             try {
                 socketRef.current.send(JSON.stringify(data));
@@ -66,7 +65,6 @@ export default function useSocket(token, ws_url) {
     const stopStreaming = ()=>{
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN){
             try {
-                console.log('stop streaming is called in websocket hook');
                 socketRef.current.send(JSON.stringify({ type: 'stop_streaming' }));
             } catch (err) {
                 console.error(err);

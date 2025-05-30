@@ -37,7 +37,13 @@ export default function useConversation(initialToken) {
     try {
       const data = await fetchConversationMessages(token, pageNum);
       setMessages(prev => (pageNum === 1 ? data.results : [...prev, ...data.results]));
-      setHasMore(data.next !== null);
+      // console.log(!!data.next)
+      if (!data.results || data.results.length === 0) {
+        setHasMore(false);
+      } 
+      else{
+        setHasMore(!!data.next);
+      }
     } catch (err) {
       console.error(err);
       setError(err);
@@ -89,6 +95,7 @@ export default function useConversation(initialToken) {
       setIsStreaming(false);
       setError(socketError);
     }
+
   }, [socketError]);
 
   // Send message (new or existing conversation)
@@ -124,9 +131,11 @@ export default function useConversation(initialToken) {
   // Initial or token change: load messages
   useEffect(() => {
     if (token) {
+      setPage(1);
       loadMessages(1);
     } else {
       setMessages([]);
+      setError(null);
     }
   }, [token, loadMessages]);
 
@@ -141,6 +150,7 @@ export default function useConversation(initialToken) {
 
   return {
     messages,
+    setMessages,
     loading,
     error,
     sendMessage,

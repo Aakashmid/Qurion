@@ -10,6 +10,7 @@ import { LuLogOut, LuTrash2 } from 'react-icons/lu';
 export default function SettingsModal({ onClose }) {
     const componentRef = useRef(null);
     const { user } = useSidebar();
+    const { logout, deleteAccount } = useAuth();
     const navigate = useNavigate();
     useClickOutside(componentRef, () => {
         onClose();
@@ -89,14 +90,14 @@ export default function SettingsModal({ onClose }) {
                 <section className="DataControl">
                     <h3 className="text font-semibold mb-2 text-purple">Account Actions</h3>
                     <div className="flex flex-col gap-4 w-fit">
-                        <div className="border border-gray-700 text-white px-4 py-1 rounded-lg flex gap-3 items-center hover:text-red-500 hover:border-red-500 transition-colors">
-                            <LuLogOut/>
-                            <button className="">Logout</button>
-                        </div>
-                        <div className="border border-gray-700 text-white px-4 py-1 rounded-lg flex gap-3 items-center hover:text-red-500 hover:border-red-500 transition-colors">
-                            <LuTrash2/>
-                        <button className="">Delete Account</button>
-                        </div>
+                        <button onClick={()=>logout()} className="border border-gray-700 text-white px-4 py-1 rounded-lg flex gap-3 items-center hover:text-red-500 hover:border-red-500 transition-colors">
+                            <LuLogOut />
+                            <span>Logout</span>
+                        </button>
+                        <button onClick={() => deleteAccount()} className="border border-gray-700 text-white px-4 py-1 rounded-lg flex gap-3 items-center hover:text-red-500 hover:border-red-500 transition-colors">
+                            <LuTrash2 />
+                            <span>Delete Account</span>
+                        </button>
                     </div>
                 </section>
             </div>

@@ -16,12 +16,12 @@ export default function ChatPage() {
 
   const {
     messages,
+    setMessages,
     loading,
     error,
     sendMessage,
     loadMore,
     isLoadedMore,
-    setIsLoadedMore,
     hasMore,
     clearError,
     isConnected,
@@ -35,9 +35,9 @@ export default function ChatPage() {
   const isFirstRender = useRef(true);
   const loadingMore = useRef(false);
 
-  useEffect(() => {
-    isFirstRender.current = true;
-  }, [conversation_token]);
+
+  isFirstRender.current = true;
+
 
   useEffect(() => {
     const scrollToPosition = () => {
@@ -64,7 +64,7 @@ export default function ChatPage() {
   useEffect(() => {
     const element = scrollableRef.current;
     const handleScroll = () => {
-      if (!element || !hasMore || loading || loadingMore.current) {
+      if (!element || !hasMore || loading || loadingMore.current || !conversation_token) {
         return;
       }
       const { scrollTop } = element;
@@ -73,17 +73,15 @@ export default function ChatPage() {
         prevScrollHeight.current = element.scrollHeight;
         loadMore();
       }
-
     };
 
+    if (!element || !conversation_token) return;
 
     element.addEventListener('scroll', handleScroll);
     return () => {
       element.removeEventListener('scroll', handleScroll);
     };
-  }, [hasMore, loading, scrollableRef]);
-
-
+  }, [hasMore, loading, scrollableRef, conversation_token]);
 
 
   useEffect(() => {
@@ -144,7 +142,7 @@ export default function ChatPage() {
                 ))
               ) : (
                 !loading && (
-                  <div className="flex justify-center items-center text-2xl font-semibold text-gray-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className=" flex justify-center items-center text-2xl font-semibold text-gray-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">
                     How can I help you today?
                   </div>
                 )
@@ -152,23 +150,24 @@ export default function ChatPage() {
             </div>
 
             {error && (
-              <div className="w-full lg:w-fit mx-auto">
-                <SomethinkWrongErr />
+              <div className="w-full sm:w-fit mx-auto">
+                <SomethinkWrongErr clearError={clearError} />
               </div>
             )}
 
-            {showScrollBtn && (
-              <button
-                onClick={scrollToBottom}
-                className="bg-gray-900 rounded-full fixed bottom-[6.2rem] right-1/2 translate-x-1/2 p-2 cursor-pointer border border-gray-800 hover:bg-gray-800"
-              >
-                <IoArrowDown className="h-6 w-6 text-white" />
-              </button>
-            )}
+
           </div>
         </div>
 
-        <div className="w-full bg-gray-800 relative">
+        <div className="w-full relative">
+
+          <button
+            onClick={scrollToBottom}
+            className={` ${showScrollBtn ? 'block':'hidden'} bg-gray-900 rounded-full absolute z-10 -top-12  right-1/2 translate-x-1/2 p-2 cursor-pointer border border-gray-800 hover:bg-gray-800`}
+          >
+            <IoArrowDown className="h-6 w-6 text-white" />
+          </button>
+
           <MessageInput
             onSendMessage={sendMessage}
             stopStreaming={stopStreaming}

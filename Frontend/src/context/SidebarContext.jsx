@@ -12,22 +12,20 @@ export const SidebarProvider = ({ children }) => {
     const [pageNum, setPageNum] = useState(1);
     const [hasMore, setHasMore] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    const getConversations = async () => {
-        try {
-            setLoading(true);
-            const data = await fetchConversations();
-            if (data?.results?.length > 0) {
-                setConversations(data.results);
-            }
-            setHasMore(data.next !== null);
-        } catch (error) {
-            console.error('Error fetching conversations:', error);
-        }
-        finally {
-            setLoading(false);
-        }
-    };
+      const getConversations = async () => {
+          try {
+              setLoading(true);
+              const data = await fetchConversations();
+              setConversations(data?.results || []);
+              setHasMore(Boolean(data?.next));
+          } catch (error) {
+              console.error('Error fetching conversations:', error);
+              setConversations([]);
+              setHasMore(false);
+          } finally {
+              setLoading(false);
+          }
+      };
 
     const loadMoreConversations = async () => {
         try {

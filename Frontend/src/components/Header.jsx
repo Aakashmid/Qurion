@@ -28,7 +28,6 @@ export default function Header() {
     useClickOutside(menuRef, () => setIsMenuOpen(false));
 
     const handleCreateNewChat = () => {
-        console.log('new chat created');
         navigate('/');
     }
 

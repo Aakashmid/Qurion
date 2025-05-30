@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
 export default function AuthForm({ onSubmit, formType, error }) {
   const navigate = useNavigate()
@@ -7,6 +8,7 @@ export default function AuthForm({ onSubmit, formType, error }) {
     username_or_email: '',
     password: ''
   })
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -35,18 +37,28 @@ export default function AuthForm({ onSubmit, formType, error }) {
         </div>
         <div>
           <label className="block font-medium text-gray-700">Password</label>
-          <input required
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="password"
-          />
+          <div className="relative">
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+              placeholder="password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              onClick={() => setShowPassword((prev) => !prev)}
+              tabIndex={-1}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           <div className="mt-2">
-
-            <div className={`p-1 text-[13px] justify-center text-red-600 ${error ? 'flex translate-y-0 ':'hidden -translate-y-2'} transition-all duration-200`}>
-              {error} 
+            <div className={`p-1 text-[13px] justify-center text-red-600 ${error ? 'flex translate-y-0 ' : 'hidden -translate-y-2'} transition-all duration-200`}>
+              {error}
             </div>
             <p className="">
               {formType === 'login' ? (

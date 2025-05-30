@@ -15,6 +15,7 @@ export default function SidebarProfileCard() {
     const popoverRef = useRef(null);
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const {accessToken} = useAuth();
     const location = useLocation();
 
     useClickOutside(popoverRef, () => setIsOpen(false));
@@ -33,6 +34,7 @@ export default function SidebarProfileCard() {
                     <div className="avatar w-8 h-8 rounded-full bg-purple flex items-center justify-center">
                         <span className="text-white font-medium">U</span>
                     </div>
+                    {/* <div className="">{accessToken}</div> */}
                     <div className="user-info">
                         <h4 className="font-medium">{user.name ? user.name : user.username}</h4>
                         <p className="text-xs text-gray-300">{user.email ? user.email : user.username}</p>

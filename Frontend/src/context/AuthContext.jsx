@@ -10,6 +10,7 @@ const AuthContext = createContext({
   login: async () => { },
   logout: async () => { },
   register: async () => { },
+  deleteAccount: async () => { },
   fetchUser: async () => { },
 });
 
@@ -132,6 +133,18 @@ export const AuthProvider = ({ children }) => {
       } finally {
         setAccessToken(null);
         setUser(null); // Clear user data on logout
+      }
+    },
+
+    deleteAccount: async () => {
+      try {
+        await api.delete('/user/');
+      } catch (error) {
+        console.error('Error deleting account:', error);
+      }
+      finally {
+        setAccessToken(null);
+        setUser(null); // Clear user data on account deletion
       }
     },
 

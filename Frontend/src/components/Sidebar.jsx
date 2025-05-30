@@ -17,12 +17,10 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { toggleSidebarOpen, conversations, getConversations, loading, loadMoreConversations, hasMore } = useSidebar();
   const location = useLocation();
-  const [selectedConversation, setSelectedConversation] = useState(null);
   const { access_token } = useAuth();
 
   const handleConversationClick = (conversation) => {
     navigate(`/c/${conversation.token}`);
-    setSelectedConversation(conversation.id);
     if (window.innerWidth < 800) {
       toggleSidebarOpen();
     }
@@ -33,7 +31,6 @@ export default function Sidebar() {
       toggleSidebarOpen();
     }
     navigate('/');
-    console.log('new chat created');
   }
 
 
@@ -83,7 +80,7 @@ export default function Sidebar() {
         <div ref={scrollableRef} className="mt-4 overflow-y-auto scrollbar-dark flex-grow">
           <ul className="flex flex-col gap-1 ">
             {conversations ? conversations.map((conversation) => (
-              <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} selectedConversation={selectedConversation} />
+              <ConversationLink key={conversation.id} conversation={conversation} onClickLink={handleConversationClick} />
             ))
               : (
                 <div className="flex flex-col gap-1">
@@ -96,8 +93,12 @@ export default function Sidebar() {
               )}
 
             {loading &&
-              <div className='flex justify-center items-center text-gray-400 text-sm mt-4'>
-                <CircualrProgress2 width={8} />
+              <div className="flex flex-col gap-1">
+                <ConvLinkSkel />
+                <ConvLinkSkel />
+                <ConvLinkSkel />
+                <ConvLinkSkel />
+
               </div>
             }
           </ul>

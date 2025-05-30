@@ -1,6 +1,6 @@
 import { IoClose, IoReload } from "react-icons/io5";
 
-export default function SomethinkWrongErr() {
+export default function SomethinkWrongErr({clearError}) {
     return (
 
         <div className="text-red-500 w-fit bg-gray-800 flex items-center border border-red-500 rounded-xl px-6 py-4 justify-between">

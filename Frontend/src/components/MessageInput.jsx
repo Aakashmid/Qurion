@@ -33,14 +33,13 @@ export default function MessageInput({ onSendMessage, stopStreaming, isStreaming
     }
   };
 
-  return (<div className='w-full   bg-gray-950 border-t-[0.5px] relative border-gray-800  flex justify-center items-center px-4 h-[6rem] '>
-<form
+  return (<div className='w-full   bg-gray-950 border-t-[0.5px] relative border-gray-800  flex justify-center items-center h-[6rem] '>
+    <div className="absolute bottom-5 md:bottom-4 left-1/2 -translate-x-1/2 px-4 w-full">
+      <form
         onSubmit={handleSubmit}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full bg-gray-800 rounded-3xl flex items-center focus-within:ring-1 focus-within:ring-purple py-2 px-3 max-w-[48rem] mx-auto transition-all"
-        style={{
-          minHeight: textareaRef.current ? textareaRef.current.style.height : '40px',
-          maxHeight: '10rem'
-        }}
+
+        className=" w-full bg-gray-800 rounded-3xl flex items-center focus-within:ring-1 focus-within:ring-purple py-2 px-3 max-w-[48rem] mx-auto transition-all overflow-y-auto max-h-[10rem]   scrollbar-dark "
+        
       >
         <button type="button" className='attachments'>
           <IoAttach className='text-gray-400 hover:text-gray-200 rotate-45 w-6 h-auto' />
@@ -52,7 +51,7 @@ export default function MessageInput({ onSendMessage, stopStreaming, isStreaming
           onChange={handleInput}
           onKeyDown={handleKeyDown}
           placeholder="Type your request here…"
-          className="w-full px-2 bg-transparent text-gray-100 focus:outline-none caret-purple resize-none max-h-[10rem] min-h-[40px] scrollbar-dark"
+          className="w-full min-h-[2.5rem] md:min-h-[3rem]   px-2 bg-transparent text-gray-100 focus:outline-none caret-purple resize-none scrollbar-hide "
           rows={1}
         />
         {isStreaming ? (
@@ -65,6 +64,7 @@ export default function MessageInput({ onSendMessage, stopStreaming, isStreaming
           </button>
         )}
       </form>
+    </div>
   </div >
   )
 }
