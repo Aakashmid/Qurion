@@ -5,13 +5,14 @@ from rest_framework import status, viewsets
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from django.db.models import Max
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def server_status(request):
     return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
