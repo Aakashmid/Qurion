@@ -19,6 +19,14 @@ CORS_ALLOWED_ORIGINS = [
 
 
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [config("CHANNEL_LAYERS_REDIS_URL")],
+        },  
+    },
+}
 
 
 # Ensure secure cookies in production
