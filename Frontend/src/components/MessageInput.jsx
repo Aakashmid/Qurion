@@ -39,7 +39,7 @@ export default function MessageInput({ onSendMessage, stopStreaming, isStreaming
         onSubmit={handleSubmit}
 
         className=" w-full bg-gray-800 rounded-3xl flex items-center focus-within:ring-1 focus-within:ring-purple py-2 px-3 max-w-[48rem] mx-auto transition-all overflow-y-auto max-h-[10rem]   scrollbar-dark "
-        
+
       >
         <button type="button" className='attachments'>
           <IoAttach className='text-gray-400 hover:text-gray-200 rotate-45 w-6 h-auto' />

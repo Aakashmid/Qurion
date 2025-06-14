@@ -12,6 +12,7 @@ const api = axios.create({
 });
 
 
+<<<<<<< HEAD
 // // Interceptor for handling server errors
 // api.interceptors.response.use(
 //   response => response,
@@ -26,6 +27,26 @@ const api = axios.create({
 //     return Promise.reject(error);
 //   }
 // );
+=======
+// Interceptor for handling server errors
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (
+      error.response &&
+      error.response.status >= 500 &&
+      window.location.pathname !== "/server-error"
+    ) {
+      window.location.href = "/server-error";
+    }
+    // Optionally handle network errors (server down)
+    // if (!error.response && window.location.pathname !== "/server-error") {
+    //   window.location.href = "/server-error";
+    // }
+    return Promise.reject(error);
+  }
+);
+>>>>>>> a276c40a05fc21ed4052cca3f03b2cfa3852679f
 
 
 
