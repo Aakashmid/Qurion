@@ -12,21 +12,5 @@ const api = axios.create({
 });
 
 
-// // Interceptor for handling server errors
-// api.interceptors.response.use(
-//   response => response,
-//   error => {
-//     // Redirect to /server-error on 5xx or network error
-//     if (
-//       (!error.response || error.response.status >= 500) &&
-//       window.location.pathname !== "/server-error"
-//     ) {
-//       window.location.href = "/server-error";
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
-
 
 export default api

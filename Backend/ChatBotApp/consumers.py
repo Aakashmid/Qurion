@@ -1,12 +1,9 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .serializers import MessageSerializer, MessageSerilizerForChatHistory
 from asgiref.sync import sync_to_async
 import json
-from .models import Message, Conversation
 import asyncio
 from openai import OpenAI
 from decouple import config
-
 
 from azure.ai.inference.aio import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
@@ -16,63 +13,75 @@ endpoint = "https://models.github.ai/inference"
 model_name = "openai/gpt-4.1"
 token = config("GITHUB_TOKEN")
 
-
 client = ChatCompletionsClient(
     endpoint=endpoint,
     credential=AzureKeyCredential(token),
 )
 
-
 conversation_histories = {}  # for conversation history for remembering the chat for ai
 stop_flags = {}  # for cross-instance signaling
 
-
-async def get_question_response(request_question, token):  # token is unique for each conversation
-    if token not in conversation_histories:
-        #  ("New conversation started")
-        conversation_histories[token] = []
-        messages = await get_conversation_message(token)
-        if messages:
-            #  print("Messages found in the database")
-            conversation_histories[token].extend(messages)
-
-    conversation_histories[token].append(UserMessage(request_question))
-
-    messages = [SystemMessage("You are a helpful assistant.")] + conversation_histories[token]
-
-    # return response in streaming format
-    response = await client.complete(messages=messages, temperature=1.0, top_p=1.0, max_tokens=1000, model=model_name, stream=True)
-
-    async for chunk in response:
-        content = chunk.choices[0].delta.content
-        if content:
-            yield content
-
-
-# to check whether the conversation exists or not
-@sync_to_async(thread_sensitive=True)
-def get_conversation_message(token):
-    try:
-        messages = Message.objects.filter(conversation__token=token).order_by('timestamp').values('request_text', 'response_text')
-        serialized_messages = MessageSerilizerForChatHistory(messages, many=True).data
-        # Flatten the list of lists
-        flattened_messages = [{"role": "user", "content": message["request_text"]} for message in serialized_messages] + [
-            {"role": "system", "content": message["response_text"]} for message in serialized_messages
-        ]
-        return flattened_messages
-
-    except Exception as e:
-        print(f"Error fetching messages: {e}")
-        return []
-
-
 @sync_to_async
-def get_conversation(token):
+def get_conversation(conversation_token):
+    """Get conversation by token"""
     try:
-        return Conversation.objects.get(token=token)
+        from .models import Conversation
+        return Conversation.objects.get(token=conversation_token)
     except Conversation.DoesNotExist:
         return None
+    except Exception as e:
+        print(f"Error getting conversation: {e}")
+        return None
 
+async def get_question_response(request_text, conversation_token):
+    """Generate AI response with conversation history"""
+    try:
+        # Get conversation history
+        if conversation_token not in conversation_histories:
+            conversation_histories[conversation_token] = []
+        
+        # Add user message to history
+        conversation_histories[conversation_token].append({
+            "role": "user", 
+            "content": request_text
+        })
+        
+        # Prepare messages for AI
+        messages = [
+            SystemMessage(content="You are a helpful AI assistant."),
+        ]
+        
+        # Add conversation history
+        for msg in conversation_histories[conversation_token]:
+            if msg["role"] == "user":
+                messages.append(UserMessage(content=msg["content"]))
+        
+        # Get AI response
+        response = await client.complete(
+            messages=messages,
+            model=model_name,
+            temperature=0.7,
+            max_tokens=1000,
+            stream=True
+        )
+        
+        full_response = ""
+        async for chunk in response:
+            if chunk.choices:
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content:
+                    full_response += delta.content
+                    yield delta.content
+        
+        # Add AI response to history
+        conversation_histories[conversation_token].append({
+            "role": "assistant",
+            "content": full_response
+        })
+        
+    except Exception as e:
+        print(f"Error in get_question_response: {e}")
+        yield "Sorry, I encountered an error while processing your request."
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -140,6 +149,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def save_message(self, request_text, response_text, conversation_token):
         try:
+            from .models import Message, Conversation
             conversation = Conversation.objects.get(token=conversation_token)
             Message.objects.create(conversation=conversation, request_text=request_text, response_text=response_text)
         except Conversation.DoesNotExist:
