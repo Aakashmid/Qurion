@@ -57,10 +57,6 @@ TEMPLATES = [
 
 ASGI_APPLICATION = 'ChatBotProject.asgi.application'
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a276c40a05fc21ed4052cca3f03b2cfa3852679f
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -82,10 +78,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-<<<<<<< HEAD
-
-=======
->>>>>>> a276c40a05fc21ed4052cca3f03b2cfa3852679f
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),

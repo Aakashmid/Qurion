@@ -13,11 +13,7 @@ from django.db.models import Max
 
 
 @api_view(['GET'])
-<<<<<<< HEAD
 @permission_classes([permissions.AllowAny])
-=======
-@permission_classes([AllowAny])
->>>>>>> a276c40a05fc21ed4052cca3f03b2cfa3852679f
 def server_status(request):
     return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
