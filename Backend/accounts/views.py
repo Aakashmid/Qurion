@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.exceptions import PermissionDenied , MethodNotAllowed
+from rest_framework.exceptions import PermissionDenied , MethodNotAllowed 
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -49,27 +50,37 @@ class CustomTokenRefreshView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        refresh_token = request.COOKIES.get('refresh_token')
-        if not refresh_token:
-            return Response(
-                {'error': 'Refresh token not found in cookies'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
+            refresh_token = request.COOKIES.get('refresh_token')
+            if not refresh_token:
+                return Response(
+                    {'error': 'Refresh token not found'}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            
+            # This will raise TokenError if blacklisted
             refresh = RefreshToken(refresh_token)
+            
+            # Generate new access token
+            new_access_token = str(refresh.access_token)
+            
+            return Response({
+                'access': new_access_token,
+                'message': 'Token refreshed successfully'
+            }, status=status.HTTP_200_OK)
+            
+        except TokenError as e:
+            # Handle blacklisted or invalid tokens
             return Response(
-                {
-                    'access': str(refresh.access_token),
-                    'message': 'Access token refreshed successfully',
-                },
-                status=status.HTTP_200_OK,
-            )
-        except ValidationError:
-            return Response(
-                {'error': 'Invalid or expired refresh token'},
+                {'error': 'Token is invalid or blacklisted', 'detail': str(e)}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
+        except InvalidToken as e:
+            return Response(
+                {'error': 'Invalid token format', 'detail': str(e)}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
 
 
 class RegisterView(APIView):

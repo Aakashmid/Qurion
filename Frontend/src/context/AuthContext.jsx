@@ -173,6 +173,7 @@ export const AuthProvider = ({ children }) => {
             }
           } catch (refreshError) {
             console.error('Refresh token is invalid or expired:', refreshError);
+            console.log('navigating to login')
             navigate('/auth/login');
             return Promise.reject(refreshError);
           }
