@@ -1,8 +1,8 @@
-import React, { use, useEffect, useRef, useState } from 'react';
+import  {  useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import HomePageLayout from '../layout/HomePageLayout';
 import MessageInput from '../components/MessageInput';
-import { IoArrowDown, IoClose, IoReload } from 'react-icons/io5';
+import { IoArrowDown } from 'react-icons/io5';
 import useConversation from '../hooks/useConversation';
 import Question from '../components/chat-page/Question';
 import Response from '../components/chat-page/Response';
@@ -116,7 +116,7 @@ export default function ChatPage() {
       <div className="bg-gray-950 relative ">
         <div
           ref={scrollableRef}
-          className="h-[calc(100vh-10rem)] overflow-y-auto p-4 scrollbar-light relative"
+          className="h-[calc(100dvh-10rem)] overflow-y-auto p-4 scrollbar-light relative"
         >
           <div className="flex flex-col chat-container max-w-[48rem] mx-auto">
             <div className="messages-container flex flex-col-reverse">
