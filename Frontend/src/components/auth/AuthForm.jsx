@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
-export default function AuthForm({ onSubmit, formType, error }) {
+export default function AuthForm({ onSubmit, formType, error, loading }) {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username_or_email: '',
@@ -69,12 +69,15 @@ export default function AuthForm({ onSubmit, formType, error }) {
             </p>
           </div>
         </div>
+       
         <button
-          type="submit"
-          className="w-full bg-gray-800 text-white py-2 px-4 rounded-md transition-colors duration-300  hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        type="submit"
+        className="w-full bg-gray-800 text-white py-2 px-4 rounded-md transition-colors duration-300  hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
+          
           {formType === 'login' ? 'Login' : 'Register'}
         </button>
+       
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-purple"></div>
