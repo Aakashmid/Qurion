@@ -1,158 +1,247 @@
+# ...existing code...
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 import json
 import asyncio
-from openai import OpenAI
 from decouple import config
 
 from azure.ai.inference.aio import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 
+# Azure Model API settings
 endpoint = "https://models.github.ai/inference"
 model_name = "openai/gpt-4.1"
 token = config("GITHUB_TOKEN")
 
-client = ChatCompletionsClient(
-    endpoint=endpoint,
-    credential=AzureKeyCredential(token),
-)
+# In-memory chat state for each conversation token
+conversation_histories = {}   # Stores running chat context
+stop_flags = {}               # Reserved for future multi-instance signalling
 
-conversation_histories = {}  # for conversation history for remembering the chat for ai
-stop_flags = {}  # for cross-instance signaling
 
 @sync_to_async
 def get_conversation(conversation_token):
-    """Get conversation by token"""
+    """
+    Fetches Conversation instance from DB using its token.
+    Returns None if not found.
+    """
     try:
         from .models import Conversation
         return Conversation.objects.get(token=conversation_token)
-    except Conversation.DoesNotExist:
-        return None
-    except Exception as e:
-        print(f"Error getting conversation: {e}")
+    except:
         return None
 
+
 async def get_question_response(request_text, conversation_token):
-    """Generate AI response with conversation history"""
+    """
+    Streams model-generated response using Azure ChatCompletionsClient.
+    Maintains a rolling conversation history per conversation token.
+    Yields text chunks incrementally.
+    """
     try:
-        # Get conversation history
+        # Initialize history bucket if not present
         if conversation_token not in conversation_histories:
             conversation_histories[conversation_token] = []
-        
-        # Add user message to history
+
+        # Add user's new message into history
         conversation_histories[conversation_token].append({
-            "role": "user", 
+            "role": "user",
             "content": request_text
         })
-        
-        # Prepare messages for AI
-        messages = [
-            SystemMessage(content="You are a helpful AI assistant."),
-        ]
-        
-        # Add conversation history
+
+        # Build message payload for LLM
+        messages = [SystemMessage(content="You are a helpful AI assistant.")]
         for msg in conversation_histories[conversation_token]:
             if msg["role"] == "user":
                 messages.append(UserMessage(content=msg["content"]))
-        
-        # Get AI response
-        response = await client.complete(
-            messages=messages,
-            model=model_name,
-            temperature=0.7,
-            max_tokens=1000,
-            stream=True
-        )
-        
-        full_response = ""
-        async for chunk in response:
-            if chunk.choices:
-                delta = chunk.choices[0].delta
-                if hasattr(delta, 'content') and delta.content:
-                    full_response += delta.content
-                    yield delta.content
-        
-        # Add AI response to history
+
+        # Create client + request streamed output
+        async with ChatCompletionsClient(
+            endpoint=endpoint,
+            credential=AzureKeyCredential(token)
+        ) as client_local:
+
+            response = await client_local.complete(
+                messages=messages,
+                model=model_name,
+                temperature=0.7,
+                max_tokens=1000,
+                stream=True
+            )
+
+            full_response = ""
+
+            # Stream chunks returned by model
+            async for chunk in response:
+                try:
+                    if chunk.choices:
+                        delta = chunk.choices[0].delta
+                        if hasattr(delta, "content") and delta.content:
+                            full_response += delta.content
+                            yield delta.content
+                except Exception:
+                    # Chunk-level errors should not break entire generation
+                    continue
+
+        # Store assistant's full response in history
         conversation_histories[conversation_token].append({
             "role": "assistant",
             "content": full_response
         })
-        
-    except Exception as e:
-        print(f"Error in get_question_response: {e}")
+
+    except Exception:
+        # Graceful fallback when Azure request fails
         yield "Sorry, I encountered an error while processing your request."
 
+
 class ChatConsumer(AsyncWebsocketConsumer):
+    """
+    WebSocket consumer handling:
+    - client connect/disconnect
+    - start/stop model streaming
+    - sending incremental response chunks to frontend
+    """
+
     async def connect(self):
+        # Extract conversation token from URL
         self.room_name = self.scope['url_route']['kwargs']['conversation_token']
         self.room_group_name = f'chat_{self.room_name}'
-        self.stop_event = asyncio.Event()
-        self.streaming_task = None  # Task for streaming
 
+        self.stop_event = asyncio.Event()     # User-triggered stop flag
+        self.streaming_task = None            # Holds server streaming task
+
+        # Validate conversation token before accepting socket
         conversation = await get_conversation(self.room_name)
         if not conversation:
-            await self.send(text_data=json.dumps({'error': 'Invalid conversation token'}))
+            await self.send(text_data=json.dumps({
+                'error': 'Invalid conversation token'
+            }))
             await self.close(code=4001)
             return
 
+        # Register WebSocket client to channel group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
+        """
+        Cleanup resources when client disconnects.
+        """
         if self.streaming_task and not self.streaming_task.done():
             self.streaming_task.cancel()
+
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message_type = text_data_json.get('type')
+        """
+        Processes incoming WebSocket messages.
+        Expected types:
+        - start_streaming: begin generating response
+        - stop_streaming: halt generation early
+        """
+        try:
+            text_data_json = json.loads(text_data)
+        except:
+            return  # ignore bad JSON silently
 
-        if message_type == 'stop_streaming':
+        message_type = text_data_json.get("type")
+
+        # Handle user stop request
+        if message_type == "stop_streaming":
             self.stop_event.set()
             return
 
-        if message_type == 'start_streaming':
-            request_text = text_data_json.get('request_text')
+        # Handle start streaming request
+        if message_type == "start_streaming":
+            request_text = text_data_json.get("request_text")
             if request_text:
                 self.stop_event.clear()
-                # Start streaming in a separate task
-                self.streaming_task = asyncio.create_task(self.stream_response(request_text))
+                # Launch response streaming task
+                self.streaming_task = asyncio.create_task(
+                    self.stream_response(request_text)
+                )
+            return
 
     async def stream_response(self, request_text):
-        await self.send(text_data=json.dumps({'request_text': request_text, 'type': 'request_text'}))
+        """
+        Streams the model response chunk-by-chunk to frontend.
+        Handles user stop requests via stop_event.
+        Saves message to DB after completion.
+        """
+        # Send the user's message back to frontend for UI display
+        await self.send(text_data=json.dumps({
+            'request_text': request_text,
+            'type': 'request_text'
+        }))
+
         response_text = ""
 
         try:
+            # Stream incremental chunks of model response
             async for chunk in get_question_response(request_text, self.room_name):
+
+                # If user triggers stop, stop immediately
                 if self.stop_event.is_set():
-                    await self.send(json.dumps({'type': 'streaming_stopped', 'message': 'Streaming stopped by user.'}))
+                    await self.send(text_data=json.dumps({
+                        'type': 'streaming_stopped',
+                        'message': 'Streaming stopped by user.'
+                    }))
                     self.stop_event.clear()
                     break
 
                 response_text += chunk
-                await self.send(text_data=json.dumps({'response_text': chunk, 'type': 'response_chunk'}))
-                await asyncio.sleep(0)
 
-            await self.send(text_data=json.dumps({'response_text': response_text, 'type': 'response_complete'}))
+                # Send chunk to frontend
+                await self.send(text_data=json.dumps({
+                    'response_text': chunk,
+                    'type': 'response_chunk'
+                }))
 
+                await asyncio.sleep(0)  # yield loop for responsiveness
+
+            # Send final assembled response
+            await self.send(text_data=json.dumps({
+                'response_text': response_text,
+                'type': 'response_complete'
+            }))
+
+            # Persist final response pair to database
             if response_text:
-                await self.save_message(request_text, response_text, conversation_token=self.room_name)
+                await self.save_message(
+                    request_text,
+                    response_text,
+                    conversation_token=self.room_name
+                )
 
         except asyncio.CancelledError:
-            await self.send(json.dumps({'type': 'streaming_stopped', 'message': 'Streaming cancelled.'}))
-        except Exception as e:
-            response_error = "Sorry, an error occurred while processing your request."
-            print(f"Error getting response: {e}")
-            await self.send(text_data=json.dumps({'message': response_error, 'type': 'error'}))
+            # Triggered when client disconnects / task is cancelled
+            await self.send(text_data=json.dumps({
+                'type': 'streaming_stopped',
+                'message': 'Streaming cancelled.'
+            }))
+
+        except Exception:
+            # Catch unexpected errors and notify client
+            await self.send(text_data=json.dumps({
+                'message': "Sorry, an error occurred while processing your request.",
+                'type': 'error'
+            }))
 
     @sync_to_async
     def save_message(self, request_text, response_text, conversation_token):
+        """
+        Saves a completed user-assistant message pair to DB.
+        """
         try:
             from .models import Message, Conversation
             conversation = Conversation.objects.get(token=conversation_token)
-            Message.objects.create(conversation=conversation, request_text=request_text, response_text=response_text)
+
+            Message.objects.create(
+                conversation=conversation,
+                request_text=request_text,
+                response_text=response_text
+            )
         except Conversation.DoesNotExist:
-            raise ValueError('Conversation not found')
+            raise ValueError("Conversation not found")
         except Exception as e:
-            raise ValueError(f'Error saving message: {str(e)}')
+            raise ValueError(f"Error saving message: {str(e)}")

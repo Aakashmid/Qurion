@@ -6,13 +6,6 @@ DEBUG = False
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
 
-DATABASES = {
-      'default': {
-          'ENGINE': 'django.db.backends.postgresql',
-          'URL': config('DATABASE_URL'),
-      }      
-}
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS').split(',')
 
@@ -38,17 +31,6 @@ CHANNEL_LAYERS = {
 }
 
 
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [config("CHANNEL_LAYERS_REDIS_URL")],
-        },  
-    },
-}
-
-
 # Ensure secure cookies in production
 SIMPLE_JWT['AUTH_COOKIE_SECURE'] = True
 SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'
@@ -56,41 +38,59 @@ SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'
 
 
 
-# for logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    # --- FORMATTERS ---
+    "formatters": {
+        "verbose": {
+            "format": "[{levelname}] {asctime} {name} | {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+        "simple": {
+            "format": "[{levelname}] {message}",
+            "style": "{",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
+
+    # --- HANDLERS ---
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "level": "INFO",
         },
-        'myapp': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/django.log",
+            "formatter": "verbose",
+            "level": "WARNING",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
+
+    # --- LOGGERS ---
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console", "file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "your_app_name": {  # Replace with your project/app
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+
+    # Root logger (fallback)
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "WARNING",
     },
 }
