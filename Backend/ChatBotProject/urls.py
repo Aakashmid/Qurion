@@ -10,7 +10,7 @@ urlpatterns = [
 
     # API Documentation
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     # Health Check
     path('api/server-status/', server_status, name='server-status'),

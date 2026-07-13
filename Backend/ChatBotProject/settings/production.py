@@ -42,7 +42,6 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
 
-    # --- FORMATTERS ---
     "formatters": {
         "verbose": {
             "format": "[{levelname}] {asctime} {name} | {message}",
@@ -54,43 +53,29 @@ LOGGING = {
         },
     },
 
-    # --- HANDLERS ---
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
             "level": "INFO",
         },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": "logs/django.log",
-            "formatter": "verbose",
-            "level": "WARNING",
-        },
     },
 
-    # --- LOGGERS ---
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
         },
         "django.request": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "ERROR",
             "propagate": False,
         },
-        "your_app_name": {  # Replace with your project/app
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
     },
 
-    # Root logger (fallback)
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "WARNING",
     },
 }
