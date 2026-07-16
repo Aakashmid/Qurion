@@ -88,8 +88,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'AI Chat App API Documentation',
-    'DESCRIPTION': 'A simple AI chat app API',
+    'TITLE': 'Qurion API Documentation',
+    'DESCRIPTION': 'A simple AI chat application API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': True,
 }

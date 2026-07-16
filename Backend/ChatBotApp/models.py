@@ -19,13 +19,13 @@ class Conversation(models.Model):
         return self.name # this will be the name of the conversation in the admin panel
 
 
-# Create your models here.
+# Message model
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, related_name='messages',  on_delete=models.CASCADE)
     request_text = models.TextField()
     response_text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    # reactions 
+    
 
     def __str__(self):
         return self.conversation.name  + " - "+  self.request_text

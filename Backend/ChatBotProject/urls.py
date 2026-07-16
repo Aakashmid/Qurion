@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from ChatBotApp.views import ConversationViewSet, server_status
+from ChatBotApp.views import  server_status
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
@@ -16,8 +16,9 @@ urlpatterns = [
     path('api/server-status/', server_status, name='server-status'),
 
     
-    # Authentication
     # Application Routes
     path('api/', include('ChatBotApp.urls')),
+    
+    # Authentication
     path('', include('accounts.urls')),
 ]
