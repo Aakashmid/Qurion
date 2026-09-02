@@ -1,4 +1,3 @@
-# ...existing code...
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 import json
@@ -6,7 +5,7 @@ import asyncio
 from decouple import config
 
 from azure.ai.inference.aio import ChatCompletionsClient
-from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.ai.inference.models import SystemMessage, UserMessage 
 from azure.core.credentials import AzureKeyCredential
 
 # Azure Model API settings
@@ -28,7 +27,7 @@ def get_conversation(conversation_token):
     try:
         from .models import Conversation
         return Conversation.objects.get(token=conversation_token)
-    except:
+    except Exception:
         return None
 
 
@@ -50,7 +49,9 @@ async def get_question_response(request_text, conversation_token):
         })
 
         # Build message payload for LLM
-        messages = [SystemMessage(content="You are a helpful AI assistant.")]
+        # Use a non-restrictive list type so both SystemMessage and UserMessage
+        # instances can be appended without static type conflicts.
+        messages= [SystemMessage(content="You are a helpful AI assistant.")]
         for msg in conversation_histories[conversation_token]:
             if msg["role"] == "user":
                 messages.append(UserMessage(content=msg["content"]))
@@ -122,6 +123,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Register WebSocket client to channel group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+
 
     async def disconnect(self, close_code):
         """

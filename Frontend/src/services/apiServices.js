@@ -1,7 +1,7 @@
 import api from "../api"
 export const checkServerStatus = async () => {
     try {
-        const response = await api.get("/server-status/")
+        const response = await api.get("/health/")
         return response.data
     } catch (error) {
         throw new Error("Server is down")

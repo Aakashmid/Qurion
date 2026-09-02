@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from ChatBotApp.views import  server_status
+from ChatBotApp.views import  check_server_status
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
@@ -13,7 +13,7 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     # Health Check
-    path('api/server-status/', server_status, name='server-status'),
+    path('api/health/', check_server_status, name='server-status'),
 
     
     # Application Routes
