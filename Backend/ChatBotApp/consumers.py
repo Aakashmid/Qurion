@@ -3,6 +3,8 @@ from asgiref.sync import sync_to_async
 import json
 import asyncio
 from decouple import config
+import logging
+logger = logging.getLogger(__name__)
 
 from azure.ai.inference.aio import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage 
