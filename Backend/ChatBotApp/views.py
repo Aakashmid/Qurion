@@ -12,10 +12,24 @@ from rest_framework import filters
 from django.db.models import Max
 
 
+from django.db import connection
+from django.db.utils import OperationalError
+
 @api_view(['GET'])
-@permission_classes([permissions.AllowAny])
-def server_status(request):
-    return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+@permission_classes([AllowAny])
+def check_server_status(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        return Response(
+            data={"status": "ok", "database": "connected"},
+            status=status.HTTP_200_OK
+        )
+    except OperationalError:
+        return Response(
+            data={"status": "error", "database": "unreachable"},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
 
 

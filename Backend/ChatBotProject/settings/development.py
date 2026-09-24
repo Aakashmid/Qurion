@@ -1,16 +1,16 @@
 from .base import *  # Import base settings
-
+import dj_database_url
 DEBUG = True
 
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default=config('DATABASE_URL'),
+        conn_max_age=600,
+    )
 }
-
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 CORS_ALLOW_CREDENTIALS = True
@@ -23,27 +23,6 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [("127.0.0.1", 6379)],
         },  
-    },
-}
-
-
-
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
     },
 }
 
