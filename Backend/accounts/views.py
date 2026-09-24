@@ -1,13 +1,10 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from rest_framework import generics, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.exceptions import (
-    APIException,
     AuthenticationFailed,
     MethodNotAllowed,
     NotAuthenticated,
-    PermissionDenied,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response

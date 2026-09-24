@@ -1,13 +1,15 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import sync_to_async
-import json
 import asyncio
-from decouple import config
+import json
 import logging
+
+from asgiref.sync import sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from decouple import config
+
 logger = logging.getLogger(__name__)
 
 from azure.ai.inference.aio import ChatCompletionsClient
-from azure.ai.inference.models import SystemMessage, UserMessage 
+from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 
 # Azure Model API settings
@@ -16,8 +18,8 @@ model_name = "openai/gpt-4.1"
 token = config("GITHUB_TOKEN")
 
 # In-memory chat state for each conversation token
-conversation_histories = {}   # Stores running chat context
-stop_flags = {}               # Reserved for future multi-instance signalling
+conversation_histories = {}  # Stores running chat context
+stop_flags = {}  # Reserved for future multi-instance signalling
 
 
 @sync_to_async
@@ -28,6 +30,7 @@ def get_conversation(conversation_token):
     """
     try:
         from .models import Conversation
+
         return Conversation.objects.get(token=conversation_token)
     except Exception:
         return None
@@ -45,31 +48,28 @@ async def get_question_response(request_text, conversation_token):
             conversation_histories[conversation_token] = []
 
         # Add user's new message into history
-        conversation_histories[conversation_token].append({
-            "role": "user",
-            "content": request_text
-        })
+        conversation_histories[conversation_token].append(
+            {"role": "user", "content": request_text}
+        )
 
         # Build message payload for LLM
         # Use a non-restrictive list type so both SystemMessage and UserMessage
         # instances can be appended without static type conflicts.
-        messages= [SystemMessage(content="You are a helpful AI assistant.")]
+        messages = [SystemMessage(content="You are a helpful AI assistant.")]
         for msg in conversation_histories[conversation_token]:
             if msg["role"] == "user":
                 messages.append(UserMessage(content=msg["content"]))
 
         # Create client + request streamed output
         async with ChatCompletionsClient(
-            endpoint=endpoint,
-            credential=AzureKeyCredential(token)
+            endpoint=endpoint, credential=AzureKeyCredential(token)
         ) as client_local:
-
             response = await client_local.complete(
                 messages=messages,
                 model=model_name,
                 temperature=0.7,
                 max_tokens=1000,
-                stream=True
+                stream=True,
             )
 
             full_response = ""
@@ -87,10 +87,9 @@ async def get_question_response(request_text, conversation_token):
                     continue
 
         # Store assistant's full response in history
-        conversation_histories[conversation_token].append({
-            "role": "assistant",
-            "content": full_response
-        })
+        conversation_histories[conversation_token].append(
+            {"role": "assistant", "content": full_response}
+        )
 
     except Exception:
         # Graceful fallback when Azure request fails
@@ -107,25 +106,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         # Extract conversation token from URL
-        self.room_name = self.scope['url_route']['kwargs']['conversation_token']
-        self.room_group_name = f'chat_{self.room_name}'
+        self.room_name = self.scope["url_route"]["kwargs"]["conversation_token"]
+        self.room_group_name = f"chat_{self.room_name}"
 
-        self.stop_event = asyncio.Event()     # User-triggered stop flag
-        self.streaming_task = None            # Holds server streaming task
+        self.stop_event = asyncio.Event()  # User-triggered stop flag
+        self.streaming_task = None  # Holds server streaming task
 
         # Validate conversation token before accepting socket
         conversation = await get_conversation(self.room_name)
         if not conversation:
-            await self.send(text_data=json.dumps({
-                'error': 'Invalid conversation token'
-            }))
+            await self.send(
+                text_data=json.dumps({"error": "Invalid conversation token"})
+            )
             await self.close(code=4001)
             return
 
         # Register WebSocket client to channel group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-
 
     async def disconnect(self, close_code):
         """
@@ -173,63 +171,70 @@ class ChatConsumer(AsyncWebsocketConsumer):
         Saves message to DB after completion.
         """
         # Send the user's message back to frontend for UI display
-        await self.send(text_data=json.dumps({
-            'request_text': request_text,
-            'type': 'request_text'
-        }))
+        await self.send(
+            text_data=json.dumps({"request_text": request_text, "type": "request_text"})
+        )
 
         response_text = ""
 
         try:
             # Stream incremental chunks of model response
             async for chunk in get_question_response(request_text, self.room_name):
-
                 # If user triggers stop, stop immediately
                 if self.stop_event.is_set():
-                    await self.send(text_data=json.dumps({
-                        'type': 'streaming_stopped',
-                        'message': 'Streaming stopped by user.'
-                    }))
+                    await self.send(
+                        text_data=json.dumps(
+                            {
+                                "type": "streaming_stopped",
+                                "message": "Streaming stopped by user.",
+                            }
+                        )
+                    )
                     self.stop_event.clear()
                     break
 
                 response_text += chunk
 
                 # Send chunk to frontend
-                await self.send(text_data=json.dumps({
-                    'response_text': chunk,
-                    'type': 'response_chunk'
-                }))
+                await self.send(
+                    text_data=json.dumps(
+                        {"response_text": chunk, "type": "response_chunk"}
+                    )
+                )
 
                 await asyncio.sleep(0)  # yield loop for responsiveness
 
             # Send final assembled response
-            await self.send(text_data=json.dumps({
-                'response_text': response_text,
-                'type': 'response_complete'
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {"response_text": response_text, "type": "response_complete"}
+                )
+            )
 
             # Persist final response pair to database
             if response_text:
                 await self.save_message(
-                    request_text,
-                    response_text,
-                    conversation_token=self.room_name
+                    request_text, response_text, conversation_token=self.room_name
                 )
 
         except asyncio.CancelledError:
             # Triggered when client disconnects / task is cancelled
-            await self.send(text_data=json.dumps({
-                'type': 'streaming_stopped',
-                'message': 'Streaming cancelled.'
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "streaming_stopped", "message": "Streaming cancelled."}
+                )
+            )
 
         except Exception:
             # Catch unexpected errors and notify client
-            await self.send(text_data=json.dumps({
-                'message': "Sorry, an error occurred while processing your request.",
-                'type': 'error'
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": "Sorry, an error occurred while processing your request.",
+                        "type": "error",
+                    }
+                )
+            )
 
     @sync_to_async
     def save_message(self, request_text, response_text, conversation_token):
@@ -237,13 +242,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         Saves a completed user-assistant message pair to DB.
         """
         try:
-            from .models import Message, Conversation
+            from .models import Conversation, Message
+
             conversation = Conversation.objects.get(token=conversation_token)
 
             Message.objects.create(
                 conversation=conversation,
                 request_text=request_text,
-                response_text=response_text
+                response_text=response_text,
             )
         except Conversation.DoesNotExist:
             raise ValueError("Conversation not found")
