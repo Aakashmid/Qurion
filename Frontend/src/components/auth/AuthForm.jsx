@@ -1,32 +1,38 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function AuthForm({ onSubmit, formType, error, loading }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username_or_email: '',
-    password: ''
-  })
+    username_or_email: "",
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prevState => ({
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   return (
     <div>
-      <form className="space-y-4" onSubmit={(e) => {
-        e.preventDefault()
-        onSubmit(formData)
-      }}>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(formData);
+        }}
+      >
         <div>
-          <label className="block font-medium text-gray-700">Email or Username</label>
-          <input required
+          <label className="block font-medium text-gray-700">
+            Email or Username
+          </label>
+          <input
+            required
             type="text"
             name="username_or_email"
             value={formData.username_or_email}
@@ -57,39 +63,59 @@ export default function AuthForm({ onSubmit, formType, error, loading }) {
             </button>
           </div>
           <div className="mt-2">
-            <div className={`p-1 text-[13px] justify-center text-red-600 ${error ? 'flex translate-y-0 ' : 'hidden -translate-y-2'} transition-all duration-200`}>
+            <div
+              className={`p-1 text-[13px] justify-center text-red-600 ${error ? "flex translate-y-0 " : "hidden -translate-y-2"} transition-all duration-200`}
+            >
               {error}
             </div>
             <p className="">
-              {formType === 'login' ? (
-                <>Don't have an account? <span className="text-purple cursor-pointer hover:underline underline-offset-1" onClick={() => navigate('/auth/register')}>Create one</span></>
+              {formType === "login" ? (
+                <>
+                  Don't have an account?{" "}
+                  <span
+                    className="text-purple cursor-pointer hover:underline underline-offset-1"
+                    onClick={() => navigate("/auth/register")}
+                  >
+                    Create one
+                  </span>
+                </>
               ) : (
-                <>Already have an account? <span className="text-purple cursor-pointer hover:underline underline-offset-1" onClick={() => navigate('/auth/login')}>Login</span></>
+                <>
+                  Already have an account?{" "}
+                  <span
+                    className="text-purple cursor-pointer hover:underline underline-offset-1"
+                    onClick={() => navigate("/auth/login")}
+                  >
+                    Login
+                  </span>
+                </>
               )}
             </p>
           </div>
         </div>
-       
+
         <button
-        type="submit"
-        className="w-full bg-gray-800 text-white py-2 px-4 rounded-md transition-colors duration-300  hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          type="submit"
+          className="w-full bg-gray-800 text-white py-2 px-4 rounded-md transition-colors duration-300  hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
-          
-          {formType === 'login' ? 'Login' : 'Register'}
+          {formType === "login" ? "Login" : "Register"}
         </button>
-       
+
+        {/* google auth part */}
+        {/* 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-purple"></div>
           </div>
           <div className="relative flex justify-center">
-            <span className="px-2 bg-gray-100 text-gray-500">Or continue with</span>
+            <span className="px-2 bg-gray-100 text-gray-500">
+              Or continue with
+            </span>
           </div>
-        </div>
-
+        </div> */}
 
         {/* Google Login Button */}
-        <button
+        {/* <button
           // onClick={handleLoginWithGoogle}
           disabled={true}
           type="button"
@@ -97,8 +123,8 @@ export default function AuthForm({ onSubmit, formType, error, loading }) {
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
           Continue with Google
-        </button>
+        </button> */}
       </form>
     </div>
-  )
+  );
 }

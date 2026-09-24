@@ -10,7 +10,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     token = serializers.CharField(read_only=True)
     class Meta:
         model = Conversation
-        fields = ['id','user_id','token','name','created_at', 'updated_at']  # Exclude the default 'id' field
+        fields = ['user_id','token','name','created_at', 'updated_at']  
 
 
     def create(self, validated_data):

@@ -37,7 +37,7 @@ export default function useSocket(token, ws_url) {
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-            // setErrorMsg(error);
+            setErrorMsg(error);
             setIsConnected(false);
         };
 
