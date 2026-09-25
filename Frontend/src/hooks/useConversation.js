@@ -52,42 +52,60 @@ export default function useConversation(initialToken) {
     }
   }, [token]);
 
-  // Handle real-time streamed responses
-  useEffect(() => {
-    if (!newResponse) return;
-
-    if (newResponse.type === 'response_chunk') {
-      responseBuffer.current += newResponse.response_text;
-      if (!updateTimeout.current) {
-        updateTimeout.current = setTimeout(() => {
-          setMessages(prev => {
-            if (prev.length > 0) {
-              return [{ ...prev[0], response_text: prev[0].response_text + responseBuffer.current }, ...prev.slice(1)];
-            } else {
-              return [{ request_text: currentRequestText.current, response_text: responseBuffer.current }];
-            }
-          });
-          responseBuffer.current = '';
-          updateTimeout.current = null;
-        }, 100);
-      }
-    } else if (newResponse.type === 'response_complete' || newResponse.type === 'streaming_stopped') {
-      setMessages(prev => {
-        if (prev.length > 0) {
-          return [{ ...prev[0], response_text: newResponse.response_text }, ...prev.slice(1)];
-        } else {
-          return [{ request_text: currentRequestText.current, response_text: newResponse.response_text }];
-        }
-      });
-      setIsStreaming(false);
-      responseBuffer.current = '';
-      clearTimeout(updateTimeout.current);
-      updateTimeout.current = null;
-    } else if (newResponse.type === 'request_text') {
-      setIsStreaming(true);
-      setMessages(prev => [{ request_text: newResponse.request_text, response_text: '' }, ...prev]);
+// ------------------------------------- 
+// handle real-time streaming of responses
+const revealQueue = useRef('');
+const revealInterval = useRef(null);
+useEffect(() => {
+  if (!newResponse) return;
+  
+  if (newResponse.type === 'response_chunk') {
+    // Feed the reveal queue directly — no need for the 100ms network batching anymore,
+    // the reveal interval below is what paces the visible typing now.
+    revealQueue.current += newResponse.response_text;
+    
+    if (!revealInterval.current) {
+      revealInterval.current = setInterval(() => {
+        if (revealQueue.current.length === 0) return;
+        
+        // Reveal a few characters per tick — tune this for typing feel
+        const CHARS_PER_TICK = 3;
+        const next = revealQueue.current.slice(0, CHARS_PER_TICK);
+        revealQueue.current = revealQueue.current.slice(CHARS_PER_TICK);
+        
+        setMessages(prev => {
+          if (prev.length > 0) {
+            return [{ ...prev[0], response_text: prev[0].response_text + next }, ...prev.slice(1)];
+          }
+          return [{ request_text: currentRequestText.current, response_text: next }];
+        });
+      }, 15); // ms per tick — lower = faster typing, higher = slower
     }
-  }, [newResponse]);
+    
+  } else if (newResponse.type === 'response_complete' || newResponse.type === 'streaming_stopped') {
+    // Full text already known — flush remaining queue instantly, don't make the user
+    // wait for the reveal interval to finish draining a long backlog.
+    clearInterval(revealInterval.current);
+    revealInterval.current = null;
+    revealQueue.current = '';
+    
+    setMessages(prev => {
+      if (prev.length > 0) {
+        return [{ ...prev[0], response_text: newResponse.response_text }, ...prev.slice(1)];
+      }
+      return [{ request_text: currentRequestText.current, response_text: newResponse.response_text }];
+    });
+    setIsStreaming(false);
+    
+  } else if (newResponse.type === 'request_text') {
+    setIsStreaming(true);
+    setMessages(prev => [{ request_text: newResponse.request_text, response_text: '' }, ...prev]);
+  }
+}, [newResponse]);
+
+// ------------------------------------- 
+
+
 
   // On WebSocket error
   useEffect(() => {
