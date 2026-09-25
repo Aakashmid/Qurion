@@ -113,3 +113,22 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+<<<<<<< HEAD
+=======
+
+
+# environment variables used in app
+SECRET_KEY = config("SECRET_KEY")
+DJANGO_ENV = config("DJANGO_ENV", default="development")
+DATABASE_URL = config("DATABASE_URL")
+
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost").split(",")
+
+CHANNEL_LAYERS_REDIS_URL = config(
+    "CHANNEL_LAYERS_REDIS_URL", default="redis://localhost:6379"
+)
+
+
+GROQ_API_KEY = config("GROQ_API_KEY")
+GEMINI_API_KEY = config("GEMINI_API_KEY")
+>>>>>>> feature/llm-integration
