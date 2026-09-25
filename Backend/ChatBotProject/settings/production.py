@@ -1,22 +1,23 @@
-from .base import *
-from decouple import config
 import dj_database_url
+from decouple import config
+
+from .base import *
 
 DEBUG = False
-ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
 
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS').split(',')
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS").split(",")
 
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DATABASES = {
-    'default': dj_database_url.config(
+    "default": dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default=config('DATABASE_URL'),
+        default=config("DATABASE_URL"),
         conn_max_age=600,
     )
 }
@@ -32,16 +33,13 @@ CHANNEL_LAYERS = {
 
 
 # Ensure secure cookies in production
-SIMPLE_JWT['AUTH_COOKIE_SECURE'] = True
-SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'
-
-
+SIMPLE_JWT["AUTH_COOKIE_SECURE"] = True
+SIMPLE_JWT["AUTH_COOKIE_SAMESITE"] = "None"
 
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-
     "formatters": {
         "verbose": {
             "format": "[{levelname}] {asctime} {name} | {message}",
@@ -52,7 +50,6 @@ LOGGING = {
             "style": "{",
         },
     },
-
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -60,7 +57,6 @@ LOGGING = {
             "level": "INFO",
         },
     },
-
     "loggers": {
         "django": {
             "handlers": ["console"],
@@ -73,7 +69,6 @@ LOGGING = {
             "propagate": False,
         },
     },
-
     "root": {
         "handlers": ["console"],
         "level": "WARNING",
