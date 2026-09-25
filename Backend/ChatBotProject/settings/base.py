@@ -111,10 +111,11 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+CORS_ALLOW_CREDENTIALS = True
+
+
 AUTH_USER_MODEL = "accounts.CustomUser"
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
-<<<<<<< HEAD
-=======
 
 
 # environment variables used in app
@@ -123,6 +124,9 @@ DJANGO_ENV = config("DJANGO_ENV", default="development")
 DATABASE_URL = config("DATABASE_URL")
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost").split(",")
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", default="http://localhost:5173"
+).split(",")
 
 CHANNEL_LAYERS_REDIS_URL = config(
     "CHANNEL_LAYERS_REDIS_URL", default="redis://localhost:6379"
@@ -131,4 +135,3 @@ CHANNEL_LAYERS_REDIS_URL = config(
 
 GROQ_API_KEY = config("GROQ_API_KEY")
 GEMINI_API_KEY = config("GEMINI_API_KEY")
->>>>>>> feature/llm-integration
